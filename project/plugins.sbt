@@ -4,9 +4,9 @@ resolvers += Resolver.url("HMRC-open-artefacts-ivy", url("https://open.artefacts
 
 resolvers += "Typesafe Releases" at "https://repo.typesafe.com/typesafe/releases/"
 
-addSbtPlugin("uk.gov.hmrc" % "sbt-auto-build" % "3.22.0")
+addSbtPlugin("uk.gov.hmrc" % "sbt-auto-build" % "3.24.0")
 
-addSbtPlugin("uk.gov.hmrc" % "sbt-distributables" % "2.5.0")
+addSbtPlugin("uk.gov.hmrc" % "sbt-distributables" % "2.6.0")
 
 addSbtPlugin("org.playframework" % "sbt-plugin" % "3.0.5")
 
@@ -16,6 +16,6 @@ addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.0.9")
 
 addSbtPlugin("uk.gov.hmrc" % "sbt-sass-compiler" % "0.9.0")
 
-addSbtPlugin("net.ground5hark.sbt" % "sbt-concat" % "0.2.0")
+addSbtPlugin("com.github.sbt" % "sbt-concat" % "1.0.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.4")
+addSbtPlugin("com.github.sbt" % "sbt-digest" % "2.0.0")
