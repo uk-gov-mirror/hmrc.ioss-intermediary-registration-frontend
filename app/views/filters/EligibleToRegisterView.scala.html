@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import pages.Waypoints
 @import controllers.filters.routes
 
 @this(
@@ -22,7 +23,7 @@
         govukButton: GovukButton
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("eligibleToRegister.title"))) {
 
@@ -30,7 +31,7 @@
 
     <p class="govuk-body">@messages("eligibleToRegister.p1")</p>
 
-    @formHelper(action = routes.EligibleToRegisterController.onSubmit(), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.EligibleToRegisterController.onSubmit(waypoints), Symbol("autoComplete") -> "off") {
     
         @govukButton(
             ButtonViewModel(messages("site.continue")).withAttribute("id", "continue")

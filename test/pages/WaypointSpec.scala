@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package pages.filters
+package pages
 
-import controllers.filters.routes
-import pages.{Page, Waypoints}
-import play.api.mvc.Call
+import org.scalatest.OptionValues
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 
-case object EligibleToRegisterPage extends Page {
+class WaypointSpec extends AnyFreeSpec with Matchers with OptionValues {
 
-  override def route(waypoints: Waypoints): Call =
-    routes.EligibleToRegisterController.onPageLoad(waypoints)
+  // TODO once authenticated journey initiates with loop journeys
 }

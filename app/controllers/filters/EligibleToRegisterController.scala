@@ -18,6 +18,7 @@ package controllers.filters
 
 import controllers.actions.*
 import controllers.routes
+import pages.Waypoints
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -33,12 +34,12 @@ class EligibleToRegisterController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
   
-  def onPageLoad: Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
     implicit request =>
-      Ok(view())
+      Ok(view(waypoints))
   }
 
-  def onSubmit: Action[AnyContent] = Action {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = Action {
     _ =>
       //TODO Redirect to auth onSignIn() when created.
       Redirect(routes.IndexController.onPageLoad())

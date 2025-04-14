@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package pages.filters
+package pages
 
-import controllers.filters.routes
-import pages.{Page, Waypoints}
-import play.api.mvc.Call
-
-case object EligibleToRegisterPage extends Page {
-
-  override def route(waypoints: Waypoints): Call =
-    routes.EligibleToRegisterController.onPageLoad(waypoints)
+trait AddToListSection {
+  
 }
+

@@ -17,11 +17,11 @@
 package pages.filters
 
 import controllers.filters.routes
-import pages.Page
+import pages.{Page, Waypoints}
 import play.api.mvc.Call
 
 case object CannotRegisterNoVatInUkPage extends Page {
 
-//  override def route(): Call =
-//    controllers.routes.CannotRegisterNoVatInUkController.onPageLoad()
+  override def route(waypoints: Waypoints): Call =
+    routes.CannotRegisterNoVatInUkController.onPageLoad(waypoints)
 }

@@ -18,8 +18,7 @@ package controllers.filters
 
 import controllers.actions.*
 import forms.filters.BusinessBasedInNiOrEuFormProvider
-import models.UserAnswers
-import navigation.Navigator
+import pages.Waypoints
 import pages.filters.BusinessBasedInNiOrEuPage
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -33,7 +32,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class BusinessBasedInNiOrEuController @Inject()(
                                          override val messagesApi: MessagesApi,
                                          cc: UnauthenticatedControllerComponents,
-                                         navigator: Navigator,
                                          formProvider: BusinessBasedInNiOrEuFormProvider,
                                          view: BusinessBasedInNiOrEuView
                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
@@ -41,29 +39,29 @@ class BusinessBasedInNiOrEuController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(): Action[AnyContent] = cc.identifyAndGetOptionalData {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.identifyAndGetData {
     implicit request =>
 
-      val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(BusinessBasedInNiOrEuPage) match {
+      val preparedForm = request.userAnswers.get(BusinessBasedInNiOrEuPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm))
+      Ok(view(preparedForm, waypoints))
   }
 
-  def onSubmit(): Action[AnyContent] = cc.identifyAndGetOptionalData.async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.identifyAndGetData.async {
     implicit request =>
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors))),
+          Future.successful(BadRequest(view(formWithErrors, waypoints))),
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(BusinessBasedInNiOrEuPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(BusinessBasedInNiOrEuPage, value))
             _              <- cc.sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(BusinessBasedInNiOrEuPage, updatedAnswers))
+          } yield Redirect(BusinessBasedInNiOrEuPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
       )
   }
 }

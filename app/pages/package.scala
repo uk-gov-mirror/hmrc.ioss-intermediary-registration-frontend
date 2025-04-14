@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package pages.filters
+package object pages {
 
-import controllers.filters.routes
-import pages.{Page, Waypoints}
-import play.api.mvc.Call
+  implicit class RecoveryOps(val a: Option[Page]) {
 
-case object EligibleToRegisterPage extends Page {
-
-  override def route(waypoints: Waypoints): Call =
-    routes.EligibleToRegisterController.onPageLoad(waypoints)
+    def orRecover: Page =
+      a.getOrElse(JourneyRecoveryPage)
+  }
 }

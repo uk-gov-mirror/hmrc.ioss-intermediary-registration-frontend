@@ -19,7 +19,7 @@ package controllers.filters
 import controllers.actions.*
 import forms.filters.RegisteredForIossIntermediaryInEuFormProvider
 import models.UserAnswers
-import navigation.Navigator
+import pages.Waypoints
 import pages.filters.RegisteredForIossIntermediaryInEuPage
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -31,17 +31,16 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class RegisteredForIossIntermediaryInEuController @Inject()(
-                                                                       override val messagesApi: MessagesApi,
-                                                                       cc: UnauthenticatedControllerComponents,
-                                                                       navigator: Navigator,
-                                                                       formProvider: RegisteredForIossIntermediaryInEuFormProvider,
-                                                                       view: RegisteredForIossIntermediaryInEuView
-                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                                             override val messagesApi: MessagesApi,
+                                                             cc: UnauthenticatedControllerComponents,
+                                                             formProvider: RegisteredForIossIntermediaryInEuFormProvider,
+                                                             view: RegisteredForIossIntermediaryInEuView
+                                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   protected val controllerComponents: MessagesControllerComponents = cc
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(): Action[AnyContent] = cc.identifyAndGetOptionalData {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.identifyAndGetOptionalData {
     implicit request =>
 
       val preparedForm = request.userAnswers.getOrElse(UserAnswers(request.userId)).get(RegisteredForIossIntermediaryInEuPage) match {
@@ -49,21 +48,23 @@ class RegisteredForIossIntermediaryInEuController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm))
+      Ok(view(preparedForm, waypoints))
   }
 
-  def onSubmit(): Action[AnyContent] = cc.identifyAndGetOptionalData.async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.identifyAndGetOptionalData.async {
     implicit request =>
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors))),
+          Future.successful(BadRequest(view(formWithErrors, waypoints))),
 
         value =>
+          val originalAnswers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+          
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(RegisteredForIossIntermediaryInEuPage, value))
+            updatedAnswers <- Future.fromTry(originalAnswers.set(RegisteredForIossIntermediaryInEuPage, value))
             _              <- cc.sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(RegisteredForIossIntermediaryInEuPage, updatedAnswers))
+          } yield Redirect(RegisteredForIossIntermediaryInEuPage.navigate(waypoints, originalAnswers, updatedAnswers).route)
       )
   }
 }

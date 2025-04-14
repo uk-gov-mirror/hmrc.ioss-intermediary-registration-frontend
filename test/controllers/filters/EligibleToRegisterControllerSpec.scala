@@ -17,11 +17,16 @@
 package controllers.filters
 
 import base.SpecBase
+import controllers.routes
+import controllers.filters.{routes => filterRoutes}
+import pages.{EmptyWaypoints, Waypoints}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import views.html.filters.EligibleToRegisterView
 
 class EligibleToRegisterControllerSpec extends SpecBase {
+
+  private val waypoints: Waypoints = EmptyWaypoints
 
   "EligibleToRegister Controller" - {
 
@@ -30,14 +35,29 @@ class EligibleToRegisterControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.EligibleToRegisterController.onPageLoad().url)
+        val request = FakeRequest(GET, filterRoutes.EligibleToRegisterController.onPageLoad().url)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[EligibleToRegisterView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual view(waypoints)(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to the next page for a POST" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(POST, filterRoutes.EligibleToRegisterController.onSubmit().url)
+
+        val result = route(application, request).value
+
+        status(result) mustBe SEE_OTHER
+        //TODO Redirect to auth onSignIn() when created
+        redirectLocation(result).value mustBe routes.IndexController.onPageLoad().url
       }
     }
   }

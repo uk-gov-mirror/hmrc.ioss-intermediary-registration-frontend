@@ -17,6 +17,7 @@
 package controllers.filters
 
 import controllers.actions.*
+import pages.Waypoints
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -32,7 +33,7 @@ class CannotRegisterNoVatInUkController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
   
-  def onPageLoad: Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
     implicit request =>
       Ok(view())
   }

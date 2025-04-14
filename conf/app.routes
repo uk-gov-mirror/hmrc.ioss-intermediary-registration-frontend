@@ -22,20 +22,20 @@ GET         /account/signed-out                          controllers.auth.Signed
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad()
 
 # Filter questions section
-GET        /ioss-intermediary-registered                 controllers.filters.RegisteredForIossIntermediaryInEuController.onPageLoad()
-POST       /ioss-intermediary-registered                 controllers.filters.RegisteredForIossIntermediaryInEuController.onSubmit()
+GET        /ioss-intermediary-registered                 controllers.filters.RegisteredForIossIntermediaryInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST       /ioss-intermediary-registered                 controllers.filters.RegisteredForIossIntermediaryInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET        /cannot-register-already-registered           controllers.filters.CannotRegisterAlreadyRegisteredController.onPageLoad()
+GET        /cannot-register-already-registered           controllers.filters.CannotRegisterAlreadyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET        /registered-for-vat-in-uk                     controllers.filters.RegisteredForVatInUkController.onPageLoad()
-POST       /registered-for-vat-in-uk                     controllers.filters.RegisteredForVatInUkController.onSubmit()
+GET        /registered-for-vat-in-uk                     controllers.filters.RegisteredForVatInUkController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST       /registered-for-vat-in-uk                     controllers.filters.RegisteredForVatInUkController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET        /cannot-register-no-vat-in-uk                 controllers.filters.CannotRegisterNoVatInUkController.onPageLoad()
+GET        /cannot-register-no-vat-in-uk                 controllers.filters.CannotRegisterNoVatInUkController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET        /ni-or-eu-based                               controllers.filters.BusinessBasedInNiOrEuController.onPageLoad()
-POST       /ni-or-eu-based                               controllers.filters.BusinessBasedInNiOrEuController.onSubmit()
+GET        /ni-or-eu-based                               controllers.filters.BusinessBasedInNiOrEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST       /ni-or-eu-based                               controllers.filters.BusinessBasedInNiOrEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET        /cannot-register-no-ni-or-eu-business         controllers.filters.CannotRegisterNoNiOrEuBusinessController.onPageLoad()
+GET        /cannot-register-no-ni-or-eu-business         controllers.filters.CannotRegisterNoNiOrEuBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET        /register-to-use-service                      controllers.filters.EligibleToRegisterController.onPageLoad()
-POST       /register-to-use-service                      controllers.filters.EligibleToRegisterController.onSubmit()
+GET        /register-to-use-service                      controllers.filters.EligibleToRegisterController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST       /register-to-use-service                      controllers.filters.EligibleToRegisterController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

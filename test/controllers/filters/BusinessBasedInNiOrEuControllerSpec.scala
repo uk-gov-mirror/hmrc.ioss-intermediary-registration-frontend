@@ -19,14 +19,13 @@ package controllers.filters
 import base.SpecBase
 import forms.filters.BusinessBasedInNiOrEuFormProvider
 import models.UserAnswers
-import navigation.{FakeNavigator, Navigator}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
+import pages.{EmptyWaypoints, Waypoints}
 import pages.filters.BusinessBasedInNiOrEuPage
 import play.api.data.Form
 import play.api.inject.bind
-import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.UnauthenticatedUserAnswersRepository
@@ -36,12 +35,12 @@ import scala.concurrent.Future
 
 class BusinessBasedInNiOrEuControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute: Call = Call("GET", "/intermediary-ioss")
+  private val waypoints: Waypoints = EmptyWaypoints
 
   val formProvider = new BusinessBasedInNiOrEuFormProvider()
   val form: Form[Boolean] = formProvider()
 
-  lazy val businessBasedInNiOrEuRoute = routes.BusinessBasedInNiOrEuController.onPageLoad().url
+  lazy val businessBasedInNiOrEuRoute = routes.BusinessBasedInNiOrEuController.onPageLoad(waypoints).url
 
   "BusinessBasedInNiOrEu Controller" - {
 
@@ -57,7 +56,7 @@ class BusinessBasedInNiOrEuControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[BusinessBasedInNiOrEuView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, waypoints)(request, messages(application)).toString
       }
     }
 
@@ -75,7 +74,7 @@ class BusinessBasedInNiOrEuControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(true))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(true), waypoints)(request, messages(application)).toString
       }
     }
 
@@ -88,7 +87,6 @@ class BusinessBasedInNiOrEuControllerSpec extends SpecBase with MockitoSugar {
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[UnauthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
           )
           .build()
@@ -99,9 +97,12 @@ class BusinessBasedInNiOrEuControllerSpec extends SpecBase with MockitoSugar {
             .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
+        val expectedAnswers = emptyUserAnswers.set(BusinessBasedInNiOrEuPage, true).success.value
+
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
+        redirectLocation(result).value mustBe BusinessBasedInNiOrEuPage.navigate(waypoints, emptyUserAnswers, expectedAnswers).route.url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
 
@@ -121,7 +122,7 @@ class BusinessBasedInNiOrEuControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, waypoints)(request, messages(application)).toString
       }
     }
   }

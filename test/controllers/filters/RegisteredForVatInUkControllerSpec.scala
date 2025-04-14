@@ -19,13 +19,13 @@ package controllers.filters
 import base.SpecBase
 import forms.filters.RegisteredForVatInUkFormProvider
 import models.UserAnswers
-import navigation.{FakeNavigator, Navigator}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
+import pages.{EmptyWaypoints, Waypoints}
 import pages.filters.RegisteredForVatInUkPage
+import play.api.data.Form
 import play.api.inject.bind
-import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.UnauthenticatedUserAnswersRepository
@@ -35,12 +35,12 @@ import scala.concurrent.Future
 
 class RegisteredForVatInUkControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute = Call("GET", "/intermediary-ioss")
+  private val waypoints: Waypoints = EmptyWaypoints
 
   val formProvider = new RegisteredForVatInUkFormProvider()
-  val form = formProvider()
+  val form: Form[Boolean] = formProvider()
 
-  lazy val registeredForVatInUkRoute = routes.RegisteredForVatInUkController.onPageLoad().url
+  lazy val registeredForVatInUkRoute = routes.RegisteredForVatInUkController.onPageLoad(waypoints).url
 
   "RegisteredForVatInUk Controller" - {
 
@@ -56,7 +56,7 @@ class RegisteredForVatInUkControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[RegisteredForVatInUkView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, waypoints)(request, messages(application)).toString
       }
     }
 
@@ -74,7 +74,7 @@ class RegisteredForVatInUkControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(true))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(true), waypoints)(request, messages(application)).toString
       }
     }
 
@@ -87,7 +87,6 @@ class RegisteredForVatInUkControllerSpec extends SpecBase with MockitoSugar {
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[UnauthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
           )
           .build()
@@ -98,9 +97,11 @@ class RegisteredForVatInUkControllerSpec extends SpecBase with MockitoSugar {
             .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
+        val expectedAnswers = emptyUserAnswers.set(RegisteredForVatInUkPage, true).success.value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe RegisteredForVatInUkPage.navigate(waypoints, emptyUserAnswers, expectedAnswers).route.url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
 
@@ -120,7 +121,7 @@ class RegisteredForVatInUkControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, waypoints)(request, messages(application)).toString
       }
     }
   }
