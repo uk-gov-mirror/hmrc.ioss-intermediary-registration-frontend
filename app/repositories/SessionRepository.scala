@@ -17,15 +17,14 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.UserAnswers
+import models.SessionData
 import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.model._
-import org.mongodb.scala.SingleObservableFuture
+import org.mongodb.scala.model.*
+import org.mongodb.scala.{ObservableFuture, SingleObservableFuture}
 import play.api.libs.json.Format
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
-import uk.gov.hmrc.play.http.logging.Mdc
 
 import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
@@ -37,62 +36,63 @@ class SessionRepository @Inject()(
                                    mongoComponent: MongoComponent,
                                    appConfig: FrontendAppConfig,
                                    clock: Clock
-                                 )(implicit ec: ExecutionContext)
-  extends PlayMongoRepository[UserAnswers](
-    collectionName = "user-answers",
-    mongoComponent = mongoComponent,
-    domainFormat   = UserAnswers.format,
-    indexes        = Seq(
-      IndexModel(
-        Indexes.ascending("lastUpdated"),
-        IndexOptions()
-          .name("lastUpdatedIdx")
-          .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
-      )
+                                 )(implicit ec: ExecutionContext) extends PlayMongoRepository[SessionData](
+  collectionName = "session-data",
+  mongoComponent = mongoComponent,
+  domainFormat = SessionData.format,
+  indexes = Seq(
+    IndexModel(
+      Indexes.ascending("lastUpdated"),
+      IndexOptions()
+        .name("lastUpdatedIdx")
+        .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
+    ),
+    IndexModel(
+      Indexes.ascending("userId"),
+      IndexOptions()
+        .name("userIdIdx")
+        .unique(true)
     )
-  ) {
+  )
+) {
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
-  private def byId(id: String): Bson = Filters.equal("_id", id)
+  private def byUserId(userId: String): Bson = Filters.equal("userId", userId)
 
-  def keepAlive(id: String): Future[Boolean] = Mdc.preservingMdc {
+  def keepAlive(userId: String): Future[Boolean] =
     collection
-      .updateOne(
-        filter = byId(id),
+      .updateMany(
+        filter = byUserId(userId),
         update = Updates.set("lastUpdated", Instant.now(clock)),
       )
       .toFuture()
       .map(_ => true)
-  }
 
-  def get(id: String): Future[Option[UserAnswers]] = Mdc.preservingMdc {
-    keepAlive(id).flatMap {
+  def get(userId: String): Future[Seq[SessionData]] =
+    keepAlive(userId).flatMap {
       _ =>
         collection
-          .find(byId(id))
-          .headOption()
+          .find(byUserId(userId)).toFuture()
     }
-  }
 
-  def set(answers: UserAnswers): Future[Boolean] = Mdc.preservingMdc {
+  def set(sessionData: SessionData): Future[Boolean] = {
 
-    val updatedAnswers = answers copy (lastUpdated = Instant.now(clock))
+    val updatedSessionData = sessionData.copy(lastUpdated = Instant.now(clock))
 
     collection
       .replaceOne(
-        filter      = byId(updatedAnswers.id),
-        replacement = updatedAnswers,
-        options     = ReplaceOptions().upsert(true)
+        filter = byUserId(updatedSessionData.userId),
+        replacement = updatedSessionData,
+        options = ReplaceOptions().upsert(true)
       )
       .toFuture()
-      .map(_ => true)
+      .map(_.wasAcknowledged())
   }
 
-  def clear(id: String): Future[Boolean] = Mdc.preservingMdc {
+  def clear(userId: String): Future[Boolean] =
     collection
-      .deleteOne(byId(id))
+      .deleteOne(byUserId(userId))
       .toFuture()
       .map(_ => true)
-  }
 }

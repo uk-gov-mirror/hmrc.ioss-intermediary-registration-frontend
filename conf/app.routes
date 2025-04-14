@@ -9,6 +9,7 @@ GET         /assets/*file                                controllers.Assets.vers
 GET         /language/:lang                              controllers.LanguageSwitchController.switchToLanguage(lang: String)
 
 GET         /refresh-session                             controllers.KeepAliveController.keepAlive
+GET         /refresh-session-unauthenticated             controllers.KeepAliveController.keepAliveUnauthenticated()
 
 GET         /there-is-a-problem                          controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
@@ -19,3 +20,22 @@ GET         /account/sign-out                            controllers.auth.AuthCo
 GET         /account/signed-out                          controllers.auth.SignedOutController.onPageLoad()
 
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad()
+
+# Filter questions section
+GET        /ioss-intermediary-registered                 controllers.filters.RegisteredForIossIntermediaryInEuController.onPageLoad()
+POST       /ioss-intermediary-registered                 controllers.filters.RegisteredForIossIntermediaryInEuController.onSubmit()
+
+GET        /cannot-register-already-registered           controllers.filters.CannotRegisterAlreadyRegisteredController.onPageLoad()
+
+GET        /registered-for-vat-in-uk                     controllers.filters.RegisteredForVatInUkController.onPageLoad()
+POST       /registered-for-vat-in-uk                     controllers.filters.RegisteredForVatInUkController.onSubmit()
+
+GET        /cannot-register-no-vat-in-uk                 controllers.filters.CannotRegisterNoVatInUkController.onPageLoad()
+
+GET        /ni-or-eu-based                               controllers.filters.BusinessBasedInNiOrEuController.onPageLoad()
+POST       /ni-or-eu-based                               controllers.filters.BusinessBasedInNiOrEuController.onSubmit()
+
+GET        /cannot-register-no-ni-or-eu-business         controllers.filters.CannotRegisterNoNiOrEuBusinessController.onPageLoad()
+
+GET        /register-to-use-service                      controllers.filters.EligibleToRegisterController.onPageLoad()
+POST       /register-to-use-service                      controllers.filters.EligibleToRegisterController.onSubmit()
