@@ -57,7 +57,8 @@ registeredForIossIntermediaryInEuController.change.hidden = Currently registered
 cannotRegisterAlreadyRegistered.title = Come back later
 cannotRegisterAlreadyRegistered.heading = Come back later
 cannotRegisterAlreadyRegistered.p1 = You can only be registered on one Import One Stop Shop scheme.
-cannotRegisterAlreadyRegistered.p2 = You can register for this service after you deregister from your current IOSS scheme
+cannotRegisterAlreadyRegistered.p2 = You can register for this service after you deregister from your current IOSS scheme.
+cannotRegisterAlreadyRegistered.returnToBTA = <a class="govuk-link" href="/business-account">Return to your business tax account</a>
 
 
 registeredForVatInUk.title = Is your business registered for VAT in the UK?

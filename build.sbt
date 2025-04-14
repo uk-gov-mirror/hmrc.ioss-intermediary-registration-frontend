@@ -48,8 +48,19 @@ lazy val microservice = (project in file("."))
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,
     resolvers ++= Seq(Resolver.jcenterRepo),
+    // concatenate js
+    Concat.groups := Seq(
+      "javascripts/application.js" ->
+        group(
+          baseDirectory.value / "app" / "assets" / "javascripts" * "*.js"
+        )
+    ),
+    uglifyOps := UglifyOps.singleFile,
+    // prevent removal of unused code which generates warning errors due to use of third-party libs
+    uglifyCompressOptions := Seq("unused=false", "dead_code=false"),
     pipelineStages := Seq(digest),
-    Assets / pipelineStages := Seq(concat)
+    Assets / pipelineStages := Seq(concat, uglify),
+    uglify / includeFilter := GlobFilter("application*.js")
   )
 
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(
