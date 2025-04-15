@@ -47,3 +47,37 @@ signedOut.guidance = We did not save your answers.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
+
+registeredForIossIntermediaryInEuController.title = Is your business currently registered as an Import One Stop Shop intermediary in an EU country?
+registeredForIossIntermediaryInEuController.heading = Is your business currently registered as an Import One Stop Shop intermediary in an EU country?
+registeredForIossIntermediaryInEuController.checkYourAnswersLabel = Currently registered as an Import One Stop Shop intermediary in an EU country
+registeredForIossIntermediaryInEuController.error.required = Select yes if your business is currently registered as an Import One Stop Shop intermediary in an EU country
+registeredForIossIntermediaryInEuController.change.hidden = Currently registered as an Import One Stop Shop intermediary in an EU country
+
+cannotRegisterAlreadyRegistered.title = Come back later
+cannotRegisterAlreadyRegistered.heading = Come back later
+cannotRegisterAlreadyRegistered.p1 = You can only be registered on one Import One Stop Shop scheme.
+cannotRegisterAlreadyRegistered.p2 = You can register for this service after you deregister from your current IOSS scheme.
+
+
+registeredForVatInUk.title = Is your business registered for VAT in the UK?
+registeredForVatInUk.heading = Is your business registered for VAT in the UK?
+registeredForVatInUk.error.required = Select yes if your business is registered for VAT in the UK
+registeredForVatInUk.change.hidden = Registered for vat in UK
+
+cannotRegisterNoVatInUk.title = You cannot register
+cannotRegisterNoVatInUk.heading = You cannot register
+cannotRegisterNoVatInUk.p1 = Your business must be registered for VAT in the UK to use this service.
+
+businessBasedInNiOrEu.title = Is your business based in Northern Ireland or the EU?
+businessBasedInNiOrEu.heading = Is your business based in Northern Ireland or the EU?
+businessBasedInNiOrEu.error.required = Select yes if your business is based in Northern Ireland or the EU
+businessBasedInNiOrEu.change.hidden = Your business based in Northern Ireland or the EU
+
+cannotRegisterNoNiOrEuBusiness.title = You cannot register
+cannotRegisterNoNiOrEuBusiness.heading = You cannot register
+cannotRegisterNoNiOrEuBusiness.p1 = Only use this service if you are a Northern Ireland or EU business.
+
+eligibleToRegister.title = Your business can register to use this service
+eligibleToRegister.heading = Your business can register to use this service
+eligibleToRegister.p1 = You can log into the Government Gateway service to continue registration.

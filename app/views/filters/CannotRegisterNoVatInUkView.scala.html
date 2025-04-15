@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package controllers.actions
+@import controllers.filters.routes
 
-import models.UserAnswers
-import models.requests.{IdentifierRequest, OptionalDataRequest}
+@this(
+        layout: templates.Layout
+)
 
-import scala.concurrent.{ExecutionContext, Future}
+@()(implicit request: Request[_], messages: Messages)
 
-class FakeDataRetrievalAction(dataToReturn: Option[UserAnswers]) extends DataRetrievalAction {
+@layout(pageTitle = titleNoForm(messages("cannotRegisterNoVatInUk.title"))) {
 
-  override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] =
-    Future(OptionalDataRequest(request.request, request.userId, dataToReturn))
+    <h1 class="govuk-heading-l">@messages("cannotRegisterNoVatInUk.heading")</h1>
 
-  override protected implicit val executionContext: ExecutionContext =
-    scala.concurrent.ExecutionContext.Implicits.global
+    <p class="govuk-body">@messages("cannotRegisterNoVatInUk.p1")</p>
 }

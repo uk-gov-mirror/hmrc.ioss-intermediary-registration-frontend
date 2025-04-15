@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package navigation
+package pages
 
+import controllers.routes
+import models.UserAnswers
 import play.api.mvc.Call
-import pages._
-import models.{Mode, UserAnswers}
 
-class FakeNavigator(desiredRoute: Call) extends Navigator {
+object JourneyRecoveryPage extends Page {
 
-  override def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call =
-    desiredRoute
+  override def route(waypoints: Waypoints): Call =
+    routes.JourneyRecoveryController.onPageLoad()
+
+  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = ???
 }
