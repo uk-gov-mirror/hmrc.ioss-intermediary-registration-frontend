@@ -1,7 +1,7 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.UserAnswers
+import models.SessionData
 import org.mockito.Mockito.when
 import org.mongodb.scala.model.Filters
 import org.scalactic.source.Position
@@ -10,20 +10,16 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import org.slf4j.MDC
-import play.api.libs.json.Json
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
-import uk.gov.hmrc.play.bootstrap.dispatchers.MDCPropagatingExecutorService
 
 import java.time.{Clock, Instant, ZoneId}
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.Executors
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class SessionRepositorySpec
   extends AnyFreeSpec
     with Matchers
-    with DefaultPlayMongoRepositorySupport[UserAnswers]
+    with DefaultPlayMongoRepositorySupport[SessionData]
     with ScalaFutures
     with IntegrationPatience
     with OptionValues
@@ -32,8 +28,6 @@ class SessionRepositorySpec
   private val instant = Instant.now.truncatedTo(ChronoUnit.MILLIS)
   private val stubClock: Clock = Clock.fixed(instant, ZoneId.systemDefault)
 
-  private val userAnswers = UserAnswers("id", Json.obj("foo" -> "bar"), Instant.ofEpochSecond(1))
-
   private val mockAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1L
 
@@ -41,21 +35,21 @@ class SessionRepositorySpec
     mongoComponent = mongoComponent,
     appConfig      = mockAppConfig,
     clock          = stubClock
-  )(scala.concurrent.ExecutionContext.Implicits.global)
+  )
 
   ".set" - {
 
-    "must set the last updated time on the supplied user answers to `now`, and save them" in {
+    "must set the last updated time on the supplied session data to `now`, and save them" in {
 
-      val expectedResult = userAnswers copy (lastUpdated = instant)
+      val sessionData: SessionData = SessionData("id")
+      val expectedResult = sessionData copy (lastUpdated = stubClock.instant())
 
-      val setResult     = repository.set(userAnswers).futureValue
-      val updatedRecord = find(Filters.equal("_id", userAnswers.id)).futureValue.headOption.value
+      val setResult = repository.set(sessionData).futureValue
+      val updatedRecord = find(Filters.equal("userId", sessionData.userId)).futureValue.headOption.value
 
-      updatedRecord mustEqual expectedResult
+      setResult mustBe true
+      updatedRecord mustBe expectedResult
     }
-
-    mustPreserveMdc(repository.set(userAnswers))
   }
 
   ".get" - {
@@ -64,12 +58,15 @@ class SessionRepositorySpec
 
       "must update the lastUpdated time and get the record" in {
 
-        insert(userAnswers).futureValue
+        val answers: SessionData = SessionData("id")
+        val otherAnswers: SessionData = SessionData("zzz")
+        insert(answers).futureValue
+        insert(otherAnswers).futureValue
 
-        val result         = repository.get(userAnswers.id).futureValue
-        val expectedResult = userAnswers copy (lastUpdated = instant)
+        val result = repository.get(answers.userId).futureValue
+        val expectedResult = answers copy (lastUpdated = stubClock.instant())
 
-        result.value mustEqual expectedResult
+        result.head mustBe expectedResult
       }
     }
 
@@ -77,31 +74,33 @@ class SessionRepositorySpec
 
       "must return None" in {
 
-        repository.get("id that does not exist").futureValue must not be defined
+        val answers: SessionData = SessionData("id")
+        insert(answers).futureValue
+
+        repository.get("id that does not exist").futureValue mustBe Seq.empty
       }
     }
-
-    mustPreserveMdc(repository.get(userAnswers.id))
   }
 
   ".clear" - {
 
     "must remove a record" in {
 
-      insert(userAnswers).futureValue
+      val answers: SessionData = SessionData("id")
 
-      val result = repository.clear(userAnswers.id).futureValue
+      insert(answers).futureValue
 
-      repository.get(userAnswers.id).futureValue must not be defined
+      val result = repository.clear(answers.userId).futureValue
+
+      result mustBe true
+      repository.get(answers.userId).futureValue mustBe Seq.empty
     }
 
     "must return true when there is no record to remove" in {
       val result = repository.clear("id that does not exist").futureValue
 
-      result mustEqual true
+      result mustBe true
     }
-
-    mustPreserveMdc(repository.clear(userAnswers.id))
   }
 
   ".keepAlive" - {
@@ -110,14 +109,17 @@ class SessionRepositorySpec
 
       "must update its lastUpdated to `now` and return true" in {
 
-        insert(userAnswers).futureValue
+        val answers: SessionData = SessionData("id")
 
-        val result = repository.keepAlive(userAnswers.id).futureValue
+        insert(answers).futureValue
 
-        val expectedUpdatedAnswers = userAnswers copy (lastUpdated = instant)
+        val result = repository.keepAlive(answers.userId).futureValue
 
-        val updatedAnswers = find(Filters.equal("_id", userAnswers.id)).futureValue.headOption.value
-        updatedAnswers mustEqual expectedUpdatedAnswers
+        val expectedUpdatedAnswers = answers copy (lastUpdated = stubClock.instant())
+
+        result mustBe true
+        val updatedAnswers = find(Filters.equal("userId", answers.userId)).futureValue.headOption.value
+        updatedAnswers mustBe expectedUpdatedAnswers
       }
     }
 
@@ -125,23 +127,8 @@ class SessionRepositorySpec
 
       "must return true" in {
 
-        repository.keepAlive("id that does not exist").futureValue mustEqual true
+        repository.keepAlive("id that does not exist").futureValue mustBe true
       }
     }
-
-    mustPreserveMdc(repository.keepAlive(userAnswers.id))
   }
-
-  private def mustPreserveMdc[A](f: => Future[A])(implicit pos: Position): Unit =
-    "must preserve MDC" in {
-
-      implicit lazy val ec: ExecutionContext =
-        ExecutionContext.fromExecutor(new MDCPropagatingExecutorService(Executors.newFixedThreadPool(2)))
-
-      MDC.put("test", "foo")
-
-      f.map { _ =>
-        MDC.get("test") mustEqual "foo"
-      }.futureValue
-    }
 }
