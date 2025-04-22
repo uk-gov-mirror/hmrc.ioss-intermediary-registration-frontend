@@ -16,8 +16,25 @@
 
 package models.requests
 
+import models.iossRegistration.IossEtmpDisplayRegistration
+import models.ossRegistration.OssRegistration
 import play.api.mvc.{Request, WrappedRequest}
+import uk.gov.hmrc.auth.core.Enrolments
+import uk.gov.hmrc.auth.core.retrieve.Credentials
+import uk.gov.hmrc.domain.Vrn
 
-case class IdentifierRequest[A] (request: Request[A], userId: String) extends WrappedRequest[A](request)
+case class AuthenticatedIdentifierRequest[A](
+                                              request: Request[A],
+                                              credentials: Credentials,
+                                              vrn: Vrn,
+                                              enrolments: Enrolments,
+                                              iossNumber: Option[String],
+                                              numberOfIossRegistrations: Int,
+                                              latestIossRegistration: Option[IossEtmpDisplayRegistration],
+                                              latestOssRegistration: Option[OssRegistration]
+                                            ) extends WrappedRequest[A](request) {
+
+  val userId: String = credentials.providerId
+}
 
 case class SessionRequest[A](request: Request[A], userId: String) extends WrappedRequest[A](request)

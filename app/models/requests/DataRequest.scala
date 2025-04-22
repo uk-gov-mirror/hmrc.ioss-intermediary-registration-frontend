@@ -18,10 +18,38 @@ package models.requests
 
 import play.api.mvc.{Request, WrappedRequest}
 import models.UserAnswers
+import models.iossRegistration.IossEtmpDisplayRegistration
+import models.ossRegistration.OssRegistration
+import uk.gov.hmrc.auth.core.retrieve.Credentials
+import uk.gov.hmrc.domain.Vrn
 
-case class OptionalDataRequest[A](request: Request[A], userId: String, userAnswers: Option[UserAnswers]) extends WrappedRequest[A](request)
+case class AuthenticatedOptionalDataRequest[A](
+                                                request: Request[A],
+                                                credentials: Credentials,
+                                                vrn: Vrn,
+                                                userAnswers: Option[UserAnswers],
+                                                iossNumber: Option[String],
+                                                numberOfIossRegistrations: Int,
+                                                latestIossRegistration: Option[IossEtmpDisplayRegistration],
+                                                latestOssRegistration: Option[OssRegistration]
+                                              ) extends WrappedRequest[A](request) {
 
-case class DataRequest[A](request: Request[A], userId: String, userAnswers: UserAnswers) extends WrappedRequest[A](request)
+  val userId: String = credentials.providerId
+}
+
+case class AuthenticatedDataRequest[A](
+                                        request: Request[A],
+                                        credentials: Credentials,
+                                        vrn: Vrn,
+                                        userAnswers: UserAnswers,
+                                        iossNumber: Option[String],
+                                        numberOfIossRegistrations: Int,
+                                        latestIossRegistration: Option[IossEtmpDisplayRegistration],
+                                        latestOssRegistration: Option[OssRegistration]
+                                      ) extends WrappedRequest[A](request) {
+
+  val userId: String = credentials.providerId
+}
 
 case class UnauthenticatedOptionalDataRequest[A](
                                                   request: Request[A],
