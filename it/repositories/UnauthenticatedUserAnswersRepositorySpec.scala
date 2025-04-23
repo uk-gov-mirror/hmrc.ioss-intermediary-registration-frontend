@@ -1,4 +1,4 @@
-package test.repositories
+package repositories
 
 import config.FrontendAppConfig
 import models.UserAnswers
@@ -10,14 +10,13 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
-import repositories.AuthenticatedUserAnswersRepository
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.temporal.ChronoUnit
 import java.time.{Clock, Instant, ZoneId}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AuthenticatedUserAnswersRepositorySpec
+class UnauthenticatedUserAnswersRepositorySpec
   extends AnyFreeSpec
     with Matchers
     with DefaultPlayMongoRepositorySupport[UserAnswers]
@@ -34,23 +33,24 @@ class AuthenticatedUserAnswersRepositorySpec
   private val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1L
 
-  protected override val repository: AuthenticatedUserAnswersRepository = new AuthenticatedUserAnswersRepository(
+  protected override val repository: UnauthenticatedUserAnswersRepository = new UnauthenticatedUserAnswersRepository(
     mongoComponent = mongoComponent,
-    appConfig = mockAppConfig,
+    frontendAppConfig = mockAppConfig,
     clock = stubClock
   )
 
   ".set" - {
 
-    "must set the lastUpdated time on the supplied user answers to 'now', then save them" in {
+    "must set the last updated time on the supplied user answers to 'now', and save them" in {
 
       val expectedResult = userAnswers.copy(lastUpdated = stubClock.instant())
 
       val setResult = repository.set(userAnswers).futureValue
       val updatedRecord = find(Filters.equal("_id", userAnswers.id)).futureValue.headOption.value
 
-      setResult mustBe true
-      updatedRecord mustBe expectedResult
+      setResult `mustBe` true
+
+      updatedRecord `mustBe` expectedResult
     }
   }
 
@@ -58,7 +58,7 @@ class AuthenticatedUserAnswersRepositorySpec
 
     "when there is a record for this id" - {
 
-      "must update the lastUpdated time and return the record" in {
+      "must update the lastUpdated time and return the record " in {
 
         insert(userAnswers).futureValue
 
@@ -66,7 +66,7 @@ class AuthenticatedUserAnswersRepositorySpec
 
         val expectedResult = userAnswers.copy(lastUpdated = stubClock.instant())
 
-        result.value mustBe expectedResult
+        result.value `mustBe` expectedResult
       }
     }
 
@@ -79,34 +79,6 @@ class AuthenticatedUserAnswersRepositorySpec
     }
   }
 
-  ".keepAlive" - {
-
-    "when there is a record for this id" - {
-
-      "must update the lastUpdated time to 'now', then return true" in {
-
-        insert(userAnswers).futureValue
-
-        val result = repository.keepAlive(userAnswers.id).futureValue
-
-        val expectedResult = userAnswers.copy(lastUpdated = stubClock.instant())
-
-        result mustBe true
-        val updatedAnswers = find(Filters.equal("_id", userAnswers.id)).futureValue.headOption.value
-
-        expectedResult mustBe updatedAnswers
-      }
-    }
-
-    "when there is no record for this id" - {
-
-      "must return true" in {
-
-        repository.keepAlive("id that does not exist").futureValue mustBe true
-      }
-    }
-  }
-
   ".clear" - {
 
     "must remove a record" in {
@@ -115,14 +87,44 @@ class AuthenticatedUserAnswersRepositorySpec
 
       val result = repository.clear(userAnswers.id).futureValue
 
-      result mustBe true
+      result `mustBe` true
       repository.get(userAnswers.id).futureValue must not be defined
     }
 
     "must return true when there is no record to remove" in {
 
       val result = repository.clear("id that does not exist").futureValue
-      result mustBe true
+
+      result `mustBe` true
+    }
+  }
+
+  ".keepAlive" - {
+
+    "when there is a record for this id" - {
+
+      "must update the lastUpdated time to 'now', then return true" in {
+
+        insert(userAnswers).futureValue
+
+        val result = repository.keepAlive("id").futureValue
+
+        val expectedUpdatedAnswers = userAnswers.copy(lastUpdated = stubClock.instant())
+
+        result `mustBe` true
+        val updatedAnswers = find(Filters.equal("_id", userAnswers.id)).futureValue.headOption.value
+        updatedAnswers `mustBe` expectedUpdatedAnswers
+      }
+
+    }
+
+    "when there is no record for this id" - {
+
+      "must return true" in {
+
+        repository.keepAlive("id that does not exist").futureValue `mustBe` true
+      }
+
     }
   }
 

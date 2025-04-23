@@ -16,10 +16,11 @@
 
 package models.requests
 
-import play.api.mvc.{Request, WrappedRequest}
 import models.UserAnswers
 import models.iossRegistration.IossEtmpDisplayRegistration
 import models.ossRegistration.OssRegistration
+import play.api.mvc.{Request, WrappedRequest}
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.domain.Vrn
 
@@ -27,6 +28,7 @@ case class AuthenticatedOptionalDataRequest[A](
                                                 request: Request[A],
                                                 credentials: Credentials,
                                                 vrn: Vrn,
+                                                enrolments: Enrolments,
                                                 userAnswers: Option[UserAnswers],
                                                 iossNumber: Option[String],
                                                 numberOfIossRegistrations: Int,
@@ -41,6 +43,7 @@ case class AuthenticatedDataRequest[A](
                                         request: Request[A],
                                         credentials: Credentials,
                                         vrn: Vrn,
+                                        enrolments: Enrolments,
                                         userAnswers: UserAnswers,
                                         iossNumber: Option[String],
                                         numberOfIossRegistrations: Int,

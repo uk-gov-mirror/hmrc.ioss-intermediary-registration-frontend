@@ -27,12 +27,12 @@ case class Waypoint(
 
 object Waypoint {
 
-  // TODO Add journey loop pages - url fragments
   private val fragments: Map[String, Waypoint] =
     Map(
 
       AddTradingNamePage().normalModeUrlFragment -> AddTradingNamePage().waypoint(NormalMode),
-      AddTradingNamePage().checkModeUrlFragment -> AddTradingNamePage().waypoint(CheckMode)
+      AddTradingNamePage().checkModeUrlFragment -> AddTradingNamePage().waypoint(CheckMode),
+      CheckYourAnswersPage.urlFragment -> CheckYourAnswersPage.waypoint
     )
 
   def fromString(s: String): Option[Waypoint] =

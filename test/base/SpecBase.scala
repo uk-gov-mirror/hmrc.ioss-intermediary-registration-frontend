@@ -27,6 +27,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{OptionValues, TryValues}
 import pages.filters.RegisteredForIossIntermediaryInEuPage
+import pages.{EmptyWaypoints, Waypoints}
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
@@ -47,49 +48,59 @@ trait SpecBase
     with ScalaFutures
     with IntegrationPatience
     with Generators {
-  
+
+  val userAnswersId: String = "12345-credId"
+
+  lazy val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest("", "/endpoint").withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+
+  def testCredentials: Credentials = Credentials(userAnswersId, "GGW")
+
+  def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, lastUpdated = arbitraryInstant)
+
+  def emptyUserAnswersWithVatInfo: UserAnswers = emptyUserAnswers.copy(vatInfo = Some(vatCustomerInfo))
+
+  def basicUserAnswersWithVatInfo: UserAnswers = emptyUserAnswersWithVatInfo
+    .set(RegisteredForIossIntermediaryInEuPage, false).success.value
+
+  def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
+
   val arbitraryInstant: Instant = arbitraryDate.arbitrary.sample.value.atStartOfDay(ZoneId.systemDefault()).toInstant
   val stubClockAtArbitraryDate: Clock = Clock.fixed(arbitraryInstant, ZoneId.systemDefault())
 
-  def testCredentials: Credentials = Credentials(userAnswersId, "GGW")
-  def emptyUserAnswers : UserAnswers = UserAnswers(userAnswersId, lastUpdated = arbitraryInstant)
+  val vrn: Vrn = Vrn("123456789")
+  val iossNumber: String = "IM9001234567"
 
-  def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
+  val waypoints: Waypoints = EmptyWaypoints
 
   val vatCustomerInfo: VatCustomerInfo =
     VatCustomerInfo(
       registrationDate = LocalDate.now(stubClockAtArbitraryDate),
-      desAddress = DesAddress("Line1", None, None, None, None, Some("AA11 1AA"), "GB"),
+      desAddress = arbitraryDesAddress.arbitrary.sample.value,
       partOfVatGroup = false,
       organisationName = Some("Company name"),
       individualName = None,
-      singleMarketIndicator = true,
-      deregistrationDecisionDate = None,
-      overseasIndicator = false
+      singleMarketIndicator = true
     )
-
-  val userAnswersId: String = "12345-credId"
-  val vrn: Vrn = Vrn("123456789")
-  val iossNumber: String = "IM9001234567"
-
-  def emptyUserAnswersWithVatInfo: UserAnswers = emptyUserAnswers.copy(vatInfo = Some(vatCustomerInfo))
-  def basicUserAnswersWithVatInfo: UserAnswers = emptyUserAnswers.set(RegisteredForIossIntermediaryInEuPage, false).success.value.copy(vatInfo = Some(vatCustomerInfo))
 
   protected def applicationBuilder(
                                     userAnswers: Option[UserAnswers] = None,
+                                    clock: Option[Clock] = None,
                                     iossNumber: Option[String] = None,
                                     numberOfIossRegistrations: Int = 0,
                                     iossEtmpDisplayRegistration: Option[IossEtmpDisplayRegistration] = None,
                                     ossRegistration: Option[OssRegistration] = None
-                                  ): GuiceApplicationBuilder =
+                                  ): GuiceApplicationBuilder = {
+
+    val clockToBind = clock.getOrElse(stubClockAtArbitraryDate)
+
     new GuiceApplicationBuilder()
       .overrides(
         bind[AuthenticatedIdentifierAction].toInstance(new FakeAuthenticatedIdentifierAction(iossNumber, numberOfIossRegistrations, iossEtmpDisplayRegistration, ossRegistration)),
         bind[AuthenticatedDataRetrievalAction].toInstance(new FakeAuthenticatedDataRetrievalAction(userAnswers, vrn)),
-        bind[UnauthenticatedDataRetrievalAction].toInstance(new FakeUnauthenticatedDataRetrievalAction(userAnswers)),
         bind[AuthenticatedDataRequiredActionImpl].toInstance(FakeAuthenticatedDataRequiredAction(userAnswers)),
+        bind[UnauthenticatedDataRetrievalAction].toInstance(new FakeUnauthenticatedDataRetrievalAction(userAnswers)),
+        bind[Clock].toInstance(clockToBind)
       )
-
-  lazy val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest("", "").withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+  }
 }

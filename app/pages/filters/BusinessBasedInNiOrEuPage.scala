@@ -27,7 +27,7 @@ case object BusinessBasedInNiOrEuPage extends QuestionPage[Boolean] {
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "businessBasedInNiOrEu"
-  
+
   override def route(waypoints: Waypoints): Call =
     routes.BusinessBasedInNiOrEuController.onPageLoad(waypoints)
 

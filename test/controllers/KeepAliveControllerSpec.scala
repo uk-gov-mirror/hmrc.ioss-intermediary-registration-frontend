@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,61 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import repositories.UnauthenticatedUserAnswersRepository
-
-import scala.concurrent.Future
+import repositories.{AuthenticatedUserAnswersRepository, UnauthenticatedUserAnswersRepository}
+import utils.FutureSyntax.FutureOps
 
 class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
+
+  "keepAlive" - {
+
+    "when the user has answered some questions" - {
+
+      "must keep the answers alive and return OK" in {
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+        when(mockSessionRepository.keepAlive(any())) thenReturn true.toFuture
+
+        val application =
+          applicationBuilder(Some(emptyUserAnswers))
+            .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .build()
+
+        running(application) {
+
+          val request = FakeRequest(GET, routes.KeepAliveController.keepAlive.url)
+
+          val result = route(application, request).value
+
+          status(result) `mustBe` OK
+          verify(mockSessionRepository, times(1)).keepAlive(emptyUserAnswers.id)
+        }
+      }
+    }
+
+    "when the user has not answered any questions" - {
+
+      "must return OK" in {
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+        when(mockSessionRepository.keepAlive(any())) thenReturn true.toFuture
+
+        val application =
+          applicationBuilder(None)
+            .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .build()
+
+        running(application) {
+
+          val request = FakeRequest(GET, routes.KeepAliveController.keepAlive.url)
+
+          val result = route(application, request).value
+
+          status(result) `mustBe` OK
+          verify(mockSessionRepository, never()).keepAlive(any())
+        }
+      }
+    }
+  }
 
   "keepAliveUnauthenticated" - {
 
@@ -36,7 +86,7 @@ class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
       "must keep the answers alive and return OK" in {
 
         val mockSessionRepository = mock[UnauthenticatedUserAnswersRepository]
-        when(mockSessionRepository.keepAlive(any())) thenReturn Future.successful(true)
+        when(mockSessionRepository.keepAlive(any())) thenReturn true.toFuture
 
         val application =
           applicationBuilder(Some(emptyUserAnswers))
@@ -49,7 +99,7 @@ class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
 
           val result = route(application, request).value
 
-          status(result) mustEqual OK
+          status(result) `mustBe` OK
           verify(mockSessionRepository, times(1)).keepAlive(emptyUserAnswers.id)
         }
       }
@@ -60,7 +110,7 @@ class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
       "must return OK" in {
 
         val mockSessionRepository = mock[UnauthenticatedUserAnswersRepository]
-        when(mockSessionRepository.keepAlive(any())) thenReturn Future.successful(true)
+        when(mockSessionRepository.keepAlive(any())) thenReturn true.toFuture
 
         val application =
           applicationBuilder(None)
@@ -73,7 +123,7 @@ class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
 
           val result = route(application, request).value
 
-          status(result) mustEqual OK
+          status(result) `mustBe` OK
           verify(mockSessionRepository, never()).keepAlive(any())
         }
       }

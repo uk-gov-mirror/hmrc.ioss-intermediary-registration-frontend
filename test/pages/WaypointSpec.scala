@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,5 +22,10 @@ import org.scalatest.matchers.must.Matchers
 
 class WaypointSpec extends AnyFreeSpec with Matchers with OptionValues {
 
-  // TODO once authenticated journey initiates with loop journeys
+  "fromString" - {
+
+    "must return Check Your Answers when given its waypoint" in {
+      Waypoint.fromString("check-your-answers").value mustBe CheckYourAnswersPage.waypoint
+    }
+  }
 }
