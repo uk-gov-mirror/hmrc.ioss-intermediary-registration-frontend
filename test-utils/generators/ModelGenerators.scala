@@ -33,6 +33,15 @@ import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
 
 trait ModelGenerators {
 
+  implicit lazy val arbitraryContactDetails: Arbitrary[ContactDetails] =
+    Arbitrary {
+      for {
+        fullName <- arbitrary[String]
+        telephoneNumber <- arbitrary[String]
+        emailAddress <- arbitrary[String]
+      } yield ContactDetails(fullName, telephoneNumber, emailAddress)
+    }
+
   implicit lazy val arbitraryCheckVatDetails: Arbitrary[CheckVatDetails] =
     Arbitrary {
       Gen.oneOf(CheckVatDetails.values.toSeq)
