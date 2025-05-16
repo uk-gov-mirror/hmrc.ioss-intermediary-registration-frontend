@@ -175,7 +175,7 @@ class AuthenticatedIdentifierAction @Inject()(
                                 )(implicit hc: HeaderCarrier): IdentifierActionResult[A] = {
     for {
       (numberOfIossRegistrations, maybeIossNumber) <- futureMaybeIossNumber
-      maybeLatestOssRegistration <- ossRegistrationService.getLatestOssRegistration(vrn)
+      maybeLatestOssRegistration <- ossRegistrationService.getLatestOssRegistration(enrolments, vrn)
       maybeLatestIossRegistration <- iossRegistrationService.getIossRegistration(maybeIossNumber)
     } yield Right(AuthenticatedIdentifierRequest(
       request,
