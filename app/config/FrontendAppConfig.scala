@@ -58,6 +58,8 @@ class FrontendAppConfig @Inject()(configuration: Configuration) {
     configuration.get[String]("microservice.services.feedback-frontend.basePath")
   val exitSurveyUrl: String = s"$exitSurveyBaseUrl/${origin.toLowerCase}"
 
+  val intermediaryYourAccountUrl: String = "#" //todo add intermediary dashboard url
+
   val languageTranslationEnabled: Boolean =
     configuration.get[Boolean]("features.welsh-translation")
 

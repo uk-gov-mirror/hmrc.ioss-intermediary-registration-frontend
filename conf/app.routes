@@ -154,3 +154,6 @@ POST        /contact-details                                                cont
 # Bank details section
 GET         /bank-account-details                                           controllers.BankDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /bank-account-details                                           controllers.BankDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+# Other
+GET        /successful                                                      controllers.ApplicationCompleteController.onPageLoad()
