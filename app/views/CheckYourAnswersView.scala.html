@@ -15,10 +15,13 @@
  *@
 
 @import pages.CheckYourAnswersPage
+@import views.html.components.ButtonGroupProcessing
 
 @this(
     layout: templates.Layout,
-    govukSummaryList: GovukSummaryList
+    formHelper: FormWithCSRF,
+    govukSummaryList: GovukSummaryList,
+    button: ButtonGroupProcessing
 )
 
 @(waypoints: Waypoints, list: SummaryList)(implicit request: Request[_], messages: Messages)
@@ -34,5 +37,9 @@
     <p class="govuk-body">@messages("checkYourAnswers.info.p1")</p>
     
     <p class="govuk-body">@messages("checkYourAnswers.info.p2")</p>
+
+    @formHelper(action = routes.CheckYourAnswersController.onSubmit()) {
+        @button("site.submit", CheckYourAnswersPage.route(waypoints).url, waypoints)
+    }
 
 }

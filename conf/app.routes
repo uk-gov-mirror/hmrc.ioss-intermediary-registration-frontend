@@ -42,6 +42,7 @@ GET         /on-sign-in                                                     cont
 GET         /unauthorised                                                   controllers.UnauthorisedController.onPageLoad()
 
 GET         /check-your-answers                                             controllers.CheckYourAnswersController.onPageLoad()
+POST        /check-your-answers                                             controllers.CheckYourAnswersController.onSubmit()
 
 # Filter questions section
 GET         /ioss-intermediary-registered                                   controllers.filters.RegisteredForIossIntermediaryInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
