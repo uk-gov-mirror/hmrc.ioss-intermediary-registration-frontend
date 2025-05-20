@@ -16,11 +16,14 @@
 
 package generators
 
+import models.checkVatDetails.CheckVatDetails
 import models.euDetails.RegistrationType
 import models.{Country, InternationalAddress}
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
+import pages.checkVatDetails.CheckVatDetailsPage
 import pages.euDetails.*
+import pages.previousIntermediaryRegistrations.{DeleteAllPreviousIntermediaryRegistrationsPage, *}
 import pages.tradingNames.{AddTradingNamePage, DeleteAllTradingNamesPage, TradingNamePage}
 import play.api.libs.json.{JsValue, Json}
 
@@ -49,6 +52,60 @@ trait UserAnswersEntryGenerators extends PageGenerators with ModelGenerators {
       for {
         page <- arbitrary[TradingNamePage]
         value <- arbitrary[String].suchThat(_.nonEmpty).map(Json.toJson(_))
+      } yield (page, value)
+    }
+  }
+
+  implicit lazy val arbitraryCheckVatDetailsUserAnswersEntry: Arbitrary[(CheckVatDetailsPage.type, JsValue)] = {
+    Arbitrary {
+      for {
+        page <- arbitrary[CheckVatDetailsPage.type]
+        value <- arbitrary[CheckVatDetails].map(Json.toJson(_))
+      } yield (page, value)
+    }
+  }
+
+  implicit lazy val arbitraryHasPreviouslyRegisteredAsIntermediaryUserAnswersEntry: Arbitrary[(HasPreviouslyRegisteredAsIntermediaryPage.type, JsValue)] = {
+    Arbitrary {
+      for {
+        page <- arbitrary[HasPreviouslyRegisteredAsIntermediaryPage.type]
+        value <- arbitrary[Boolean].map(Json.toJson(_))
+      } yield (page, value)
+    }
+  }
+
+  implicit lazy val arbitraryPreviousEuCountryUserAnswersEntry: Arbitrary[(PreviousEuCountryPage, JsValue)] = {
+    Arbitrary {
+      for {
+        page <- arbitrary[PreviousEuCountryPage]
+        value <- arbitrary[String].suchThat(_.nonEmpty).map(Json.toJson(_))
+      } yield (page, value)
+    }
+  }
+
+  implicit lazy val arbitraryPreviousIntermediaryRegistrationNumberUserAnswersEntry: Arbitrary[(PreviousIntermediaryRegistrationNumberPage, JsValue)] = {
+    Arbitrary {
+      for {
+        page <- arbitrary[PreviousIntermediaryRegistrationNumberPage]
+        value <- arbitrary[String].suchThat(_.nonEmpty).map(Json.toJson(_))
+      } yield (page, value)
+    }
+  }
+
+  implicit lazy val arbitraryAddPreviousIntermediaryRegistrationUserAnswersEntry: Arbitrary[(AddPreviousIntermediaryRegistrationPage, JsValue)] = {
+    Arbitrary {
+      for {
+        page <- arbitrary[AddPreviousIntermediaryRegistrationPage]
+        value <- arbitrary[Boolean].map(Json.toJson(_))
+      } yield (page, value)
+    }
+  }
+
+  implicit lazy val arbitraryDeleteAllPreviousIntermediaryRegistrationsUserAnswersEntry: Arbitrary[(DeleteAllPreviousIntermediaryRegistrationsPage.type, JsValue)] = {
+    Arbitrary {
+      for {
+        page <- arbitrary[DeleteAllPreviousIntermediaryRegistrationsPage.type]
+        value <- arbitrary[Boolean].map(Json.toJson(_))
       } yield (page, value)
     }
   }

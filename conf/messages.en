@@ -219,6 +219,51 @@ deleteAllTradingNames.warning = This will delete all the trading names you have 
 deleteAllTradingNames.error.required = Select yes if you want to remove all your alternative trading names from this scheme
 deleteAllTradingNames.change.hidden = Remove all your alternative trading names from this scheme
 
+hasPreviouslyRegisteredAsIntermediary.title = Has your business ever registered as an intermediary on an Import One Stop Shop scheme in an EU country?
+hasPreviouslyRegisteredAsIntermediary.heading = Has your business ever registered as an intermediary on an Import One Stop Shop scheme in an EU country?
+hasPreviouslyRegisteredAsIntermediary.checkYourAnswersLabel = Other Import One Stop Shop registrations as an intermediary
+hasPreviouslyRegisteredAsIntermediary.error.required = Select yes if your business has ever registered as an intermediary on an Import One Stop Shop scheme in an EU country
+hasPreviouslyRegisteredAsIntermediary.change.hidden = if your business has ever registered as an intermediary on an Import One Stop Shop scheme in an EU country
+
+previousEuCountry.title = Which country was it registered in?
+previousEuCountry.heading = Which country was it registered in?
+previousEuCountry.checkYourAnswersLabel = Previous EU country
+previousEuCountry.change.hidden = {0}
+previousEuCountry.error.required = Select an EU country
+previousEuCountry.error.duplicate = You selected this EU country already. Select a different one.
+
+previousIntermediaryRegistrationNumber.title = Enter your registration number for {0}
+previousIntermediaryRegistrationNumber.heading = Enter your registration number for {0}
+previousIntermediaryRegistrationNumber.hint = {0}
+previousIntermediaryRegistrationNumber.checkYourAnswersLabel = Intermediary number
+previousIntermediaryRegistrationNumber.change.hidden = intermediary number {0}
+previousIntermediaryRegistrationNumber.error.required = Enter a previous registration number for {0}
+previousIntermediaryRegistrationNumber.error.invalid = Enter a valid intermediary identification number
+
+addPreviousIntermediaryRegistration.title.singular = You added registration details for one country
+addPreviousIntermediaryRegistration.title.plural = You added registration details for {0} countries
+addPreviousIntermediaryRegistration.heading.singular = You added registration details for one country
+addPreviousIntermediaryRegistration.heading.plural = You added registration details for {0} countries
+addPreviousIntermediaryRegistration.addAnother = Add another registration?
+addPreviousIntermediaryRegistration.addAnother.hint = You must tell us about all previous IOSS schemes.
+addPreviousIntermediaryRegistration.change.hidden = if you have registered in {0}
+addPreviousIntermediaryRegistration.remove.hidden = registered details in {0}
+addPreviousIntermediaryRegistration.error.required = Select yes if you want to add another registration
+
+deletePreviousIntermediaryRegistration.title = Are you sure you want to remove the previous intermediary registration for {0}?
+deletePreviousIntermediaryRegistration.heading = Are you sure you want to remove the previous intermediary registration for {0}?
+deletePreviousIntermediaryRegistration.error.required = Select yes if you want to remove the previous intermediary registration for {0}
+
+previousIntermediaryRegistrations.checkYourAnswers = Previous Intermediary Registrations added
+previousIntermediaryRegistrations.change.hidden = previous Intermediary Registrations
+remove.previousIntermediaryRegistration.hidden = previous intermediary registration for {0}
+change.previousIntermediaryRegistration.hidden = previous intermediary registration for {0}
+
+deleteAllPreviousIntermediaryRegistrations.title = Remove all your previous intermediary registration information?
+deleteAllPreviousIntermediaryRegistrations.heading = Remove all your previous intermediary registration information?
+deleteAllPreviousIntermediaryRegistrations.warning = This will delete all the countries you have added previous intermediary registration information for.
+deleteAllPreviousIntermediaryRegistrations.error.required = Select yes if you want to remove all your previous intermediary registration information
+
 taxRegisteredInEu.title = Is your business registered for tax in EU countries?
 taxRegisteredInEu.heading = Is your business registered for tax in EU countries?
 taxRegisteredInEu.checkYourAnswersLabel = Registered for tax in EU countries
@@ -305,6 +350,7 @@ addEuDetails.addAnother.hint = You must tell us your tax details for all EU coun
 addEuDetails.maximumReached = You have added details for every EU country
 
 euDetails.checkYourAnswersLabel = EU tax details added
+euDetails.change.hidden = EU tax details
 remove.euDetails.hidden = tax details for {0}
 change.euDetails.hidden = tax details for {0}
 

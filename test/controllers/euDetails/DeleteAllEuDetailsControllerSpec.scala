@@ -35,7 +35,7 @@ import views.html.euDetails.DeleteAllEuDetailsView
 
 class DeleteAllEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
-  private val euTaxId: String = arbitraryEuTaxReference.sample.value
+  private val euTaxId: String = genEuTaxReference.sample.value
   private val euVatNumber: String = arbitraryEuVatNumber.sample.value
   private val countryCode: String = euVatNumber.substring(0, 2)
 
@@ -140,7 +140,6 @@ class DeleteAllEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val expectedAnswers: UserAnswers = updatedAnswers
           .set(DeleteAllEuDetailsPage, false).success.value
-          .set(TaxRegisteredInEuPage, true).success.value
 
         status(result) `mustBe` SEE_OTHER
         redirectLocation(result).value `mustBe` DeleteAllEuDetailsPage.navigate(waypoints, updatedAnswers, expectedAnswers).url

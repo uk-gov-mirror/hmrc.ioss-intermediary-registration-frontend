@@ -19,23 +19,23 @@ package forms.euDetails
 import forms.behaviours.OptionFieldBehaviours
 import models.Country
 import models.euDetails.RegistrationType
-import play.api.data.FormError
+import play.api.data.{Form, FormError}
 
 class RegistrationTypeFormProviderSpec extends OptionFieldBehaviours {
 
   private val country: Country = arbitraryCountry.arbitrary.sample.value
-  
-  private val form = new RegistrationTypeFormProvider()(country)
+  private val requiredKey: String = "registrationType.error.required"
+
+  private val form: Form[RegistrationType] = new RegistrationTypeFormProvider()(country)
 
   ".value" - {
 
     val fieldName = "value"
-    val requiredKey = "registrationType.error.required"
 
     behave like optionsField[RegistrationType](
       form,
       fieldName,
-      validValues  = RegistrationType.values,
+      validValues = RegistrationType.values,
       invalidError = FormError(fieldName, "error.invalid", args = Seq(country.name))
     )
 

@@ -29,7 +29,7 @@ import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.euDetails.EuDetailsQuery
+import queries.euDetails.{AllEuDetailsRawQuery, EuDetailsQuery}
 import repositories.AuthenticatedUserAnswersRepository
 import utils.FutureSyntax.FutureOps
 import views.html.euDetails.DeleteEuDetailsView
@@ -97,9 +97,52 @@ class DeleteEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val expectedAnswers: UserAnswers = updatedAnswers
           .remove(EuDetailsQuery(countryIndex)).success.value
+          .remove(AllEuDetailsRawQuery).success.value
 
         status(result) `mustBe` SEE_OTHER
         redirectLocation(result).value `mustBe` DeleteEuDetailsPage(countryIndex).navigate(waypoints, updatedAnswers, expectedAnswers).url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+      }
+    }
+
+    "must remove the record and redirect to the next page when the user answers Yes and there are multiple countries" in {
+
+      val countryIndex2: Index = Index(1)
+      val euVatNumber2: String = arbitraryEuVatNumber.sample.value
+      val countryCode2: String = euVatNumber2.substring(0, 2)
+      val country2: Country = Country.euCountries.find(_.code == countryCode2).head
+
+      val answers: UserAnswers = updatedAnswers
+        .set(EuCountryPage(countryIndex2), country2).success.value
+        .set(HasFixedEstablishmentPage(countryIndex2), true).success.value
+        .set(RegistrationTypePage(countryIndex2), VatNumber).success.value
+        .set(EuVatNumberPage(countryIndex2), euVatNumber2).success.value
+        .set(FixedEstablishmentTradingNamePage(countryIndex2), feTradingName).success.value
+        .set(FixedEstablishmentAddressPage(countryIndex2), feAddress).success.value
+
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn true.toFuture
+
+      val application =
+        applicationBuilder(userAnswers = Some(answers))
+          .overrides(
+            bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, deleteEuDetailsRoute)
+            .withFormUrlEncodedBody(("value", "true"))
+
+        val result = route(application, request).value
+
+        val expectedAnswers: UserAnswers = answers
+          .remove(EuDetailsQuery(countryIndex)).success.value
+
+        status(result) `mustBe` SEE_OTHER
+        redirectLocation(result).value `mustBe` DeleteEuDetailsPage(countryIndex).navigate(waypoints, answers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }

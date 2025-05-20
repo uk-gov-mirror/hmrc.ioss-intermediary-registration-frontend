@@ -40,7 +40,7 @@ class FixedEstablishmentTradingNameControllerSpec extends SpecBase with MockitoS
   private val countryCode: String = euVatNumber.substring(0, 2)
   private val country: Country = Country.euCountries.find(_.code == countryCode).head
 
-  private val tradingName: String = arbitraryFixedEstablishmentTradingName.sample.value
+  private val tradingName: String = genFixedEstablishmentTradingName.sample.value
 
   private val formProvider = new FixedEstablishmentTradingNameFormProvider()
   private val form: Form[String] = formProvider(country)

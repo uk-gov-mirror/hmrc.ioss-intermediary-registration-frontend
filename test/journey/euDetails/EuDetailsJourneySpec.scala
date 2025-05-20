@@ -31,16 +31,16 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with Generato
   private val euVatNumber: String = arbitraryEuVatNumber.sample.value
   private val countryCode: String = euVatNumber.substring(0, 2)
   private val country: Country = Country(countryCode, Country.euCountries.find(_.code == countryCode).head.name)
-  private val euTaxId: String = arbitraryEuTaxReference.sample.value
+  private val euTaxId: String = genEuTaxReference.sample.value
 
   private val maxCountries: Int = Country.euCountries.size
   private val countryIndex1: Index = Index(0)
   private val countryIndex2: Index = Index(1)
   private val countryIndex3: Index = Index(2)
 
-  private val feTradingName1 = arbitraryFixedEstablishmentTradingName.sample.value
-  private val feTradingName2 = arbitraryFixedEstablishmentTradingName.sample.value
-  private val feTradingName3 = arbitraryFixedEstablishmentTradingName.sample.value
+  private val feTradingName1 = genFixedEstablishmentTradingName.sample.value
+  private val feTradingName2 = genFixedEstablishmentTradingName.sample.value
+  private val feTradingName3 = genFixedEstablishmentTradingName.sample.value
   private val feTradingNames: Seq[String] = Seq(feTradingName1, feTradingName2, feTradingName3)
   private val feAddress: InternationalAddress = arbitraryInternationalAddress.arbitrary.sample.value
 
@@ -75,17 +75,17 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with Generato
 
     def generateEuDetails: Seq[JourneyStep[Unit]] = {
       (0 until maxCountries).foldLeft(Seq.empty[JourneyStep[Unit]]) {
-        case (journeySteps: Seq[JourneyStep[Unit]], index: Int) =>
+        case (journeySteps: Seq[JourneyStep[Unit]], countryIndex: Int) =>
           journeySteps :+
-            submitAnswer(EuCountryPage(Index(index)), country) :+
-            submitAnswer(HasFixedEstablishmentPage(Index(index)), true) :+
-            submitAnswer(RegistrationTypePage(Index(index)), VatNumber) :+
-            submitAnswer(EuVatNumberPage(Index(index)), euVatNumber) :+
-            submitAnswer(FixedEstablishmentTradingNamePage(Index(index)), Gen.oneOf(feTradingNames).sample.value) :+
-            submitAnswer(FixedEstablishmentAddressPage(Index(index)), feAddress) :+
-            pageMustBe(CheckEuDetailsAnswersPage(Index(index))) :+
-            goTo(AddEuDetailsPage(Some(Index(index)))) :+
-            submitAnswer(AddEuDetailsPage(Some(Index(index))), true)
+            submitAnswer(EuCountryPage(Index(countryIndex)), country) :+
+            submitAnswer(HasFixedEstablishmentPage(Index(countryIndex)), true) :+
+            submitAnswer(RegistrationTypePage(Index(countryIndex)), VatNumber) :+
+            submitAnswer(EuVatNumberPage(Index(countryIndex)), euVatNumber) :+
+            submitAnswer(FixedEstablishmentTradingNamePage(Index(countryIndex)), Gen.oneOf(feTradingNames).sample.value) :+
+            submitAnswer(FixedEstablishmentAddressPage(Index(countryIndex)), feAddress) :+
+            pageMustBe(CheckEuDetailsAnswersPage(Index(countryIndex))) :+
+            goTo(AddEuDetailsPage(Some(Index(countryIndex)))) :+
+            submitAnswer(AddEuDetailsPage(Some(Index(countryIndex))), true)
       }
     }
 

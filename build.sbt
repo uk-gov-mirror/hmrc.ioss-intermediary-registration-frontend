@@ -37,7 +37,8 @@ lazy val microservice = (project in file("."))
       "controllers.routes._",
       "pages.Waypoints",
       "viewmodels.govuk.all._",
-      "models.euDetails._"
+      "models.euDetails._",
+      "models.previousIntermediaryRegistrations._"
     ),
     PlayKeys.playDefaultPort := 10184,
     ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;" +
@@ -51,7 +52,6 @@ lazy val microservice = (project in file("."))
     ),
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,
-    resolvers ++= Seq(Resolver.jcenterRepo),
     // concatenate js
     Concat.groups := Seq(
       "javascripts/application.js" ->

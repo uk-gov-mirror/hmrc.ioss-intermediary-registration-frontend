@@ -63,8 +63,7 @@ object EuDetailsSummary {
                      )(implicit messages: Messages): Option[SummaryListRow] = {
     answers.get(AllEuDetailsQuery).map { euDetails =>
 
-      val value = euDetails.map {
-        details =>
+      val value = euDetails.map { details =>
           HtmlFormat.escape(details.euCountry.name)
       }.mkString("<br/>")
 
