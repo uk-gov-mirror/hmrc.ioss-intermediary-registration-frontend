@@ -19,9 +19,10 @@ package base
 import controllers.actions.*
 import generators.Generators
 import models.domain.VatCustomerInfo
+import models.emailVerification.{EmailVerificationRequest, VerifyEmail}
 import models.iossRegistration.IossEtmpDisplayRegistration
 import models.ossRegistration.*
-import models.{BankDetails, Bic, DesAddress, Iban, UserAnswers}
+import models.{BankDetails, Bic, ContactDetails, DesAddress, Iban, UserAnswers}
 import org.scalatest
 import org.scalatest.EitherValues.*
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -30,7 +31,8 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.{OptionValues, TryValues}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.filters.RegisteredForIossIntermediaryInEuPage
-import pages.{EmptyWaypoints, Waypoints}
+import pages.tradingNames.HasTradingNamePage
+import pages.{BankDetailsPage, ContactDetailsPage, EmptyWaypoints, Waypoints}
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
@@ -66,6 +68,12 @@ trait SpecBase
   def basicUserAnswersWithVatInfo: UserAnswers = emptyUserAnswersWithVatInfo
     .set(RegisteredForIossIntermediaryInEuPage, false).success.value
 
+  def completeUserAnswersWithVatInfo: UserAnswers =
+    basicUserAnswersWithVatInfo
+      .set(HasTradingNamePage, false).success.value
+      .set(ContactDetailsPage, ContactDetails("fullName", "0123456789", "testEmail@example.com")).success.value
+      .set(BankDetailsPage, BankDetails("Account name", Some(bic), iban)).success.value
+
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
 
   val arbitraryInstant: Instant = arbitraryDate.arbitrary.sample.value.atStartOfDay(ZoneId.systemDefault()).toInstant
@@ -73,6 +81,8 @@ trait SpecBase
 
   val vrn: Vrn = Vrn("123456789")
   val iossNumber: String = "IM9001234567"
+  val iban: Iban = Iban("GB33BUKB20201555555555").value
+  val bic: Bic = Bic("ABCDGB2A").get
 
   val waypoints: Waypoints = EmptyWaypoints
 
@@ -143,4 +153,27 @@ trait SpecBase
     nonCompliantPayments = None,
     adminUse = mock[OssAdminUse]
   ))
+
+  val contactDetails: ContactDetails = ContactDetails(
+    fullName = "name",
+    telephoneNumber = "0111 2223334",
+    emailAddress = "email@example.com"
+  )
+  
+  val verifyEmail: VerifyEmail = VerifyEmail(
+    address = contactDetails.emailAddress,
+    enterUrl = "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details"
+  )
+
+  val emailVerificationRequest: EmailVerificationRequest = EmailVerificationRequest(
+    credId = userAnswersId,
+    continueUrl = "/intermediary-ioss/bank-account-details",
+    origin = "IOSS",
+    deskproServiceName = Some("ioss-intermediary-registration-frontend"),
+    accessibilityStatementUrl = "/intermediary-ioss",
+    pageTitle = Some("VAT Import One Stop Shop Intermediary scheme"),
+    backUrl = Some("/intermediary-ioss/business-contact-details"),
+    email = Some(verifyEmail)
+  )
+
 }

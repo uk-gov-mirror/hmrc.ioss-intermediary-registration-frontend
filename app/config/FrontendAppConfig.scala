@@ -79,4 +79,10 @@ class FrontendAppConfig @Inject()(configuration: Configuration) {
 
   val ossEnrolment: String = configuration.get[String]("oss-enrolment")
 
+  val emailVerificationUrl: String  = configuration.get[String]("urls.emailVerificationUrl")
+
+  val emailVerificationEnabled: Boolean = configuration.get[Boolean]("features.email-verification-enabled")
+
+  val accessibilityStatementUrl: String = configuration.get[String]("accessibility-statement.service-path")
+
 }
