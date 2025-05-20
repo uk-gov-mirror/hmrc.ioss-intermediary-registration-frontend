@@ -81,4 +81,13 @@ class CheckYourAnswersController @Inject()(
 
       Ok(view(waypoints, list))
   }
+
+  def onSubmit(): Action[AnyContent] = cc.authAndGetData() {
+    implicit request =>
+      //todo and incomplete prompt etc as part of CYA ticket
+      val thisPage = CheckYourAnswersPage
+      val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, thisPage.urlFragment))
+
+      Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, request.userAnswers).route)
+  }
 }

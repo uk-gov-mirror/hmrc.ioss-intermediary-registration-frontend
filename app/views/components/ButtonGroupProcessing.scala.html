@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,27 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package pages
+@import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
+@this(govukButton: GovukButton)
 
-import controllers.routes
-import models.UserAnswers
-import play.api.mvc.Call
-
-object CheckYourAnswersPage extends CheckAnswersPage {
-
-  override def isTheSamePage(other: Page): Boolean = other match {
-    case CheckYourAnswersPage  => true
-    case _ => false
-  }
-
-  override val urlFragment: String = "check-your-answers"
-
-  override def route(waypoints: Waypoints): Call =
-    routes.CheckYourAnswersController.onPageLoad()
-
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    ApplicationCompletePage
-  }
-}
+@(continueMessage: String, continueUrl: String, waypoints: Waypoints)(implicit messages: Messages)
+<div class="govuk-button-group" id="processing-button-group">
+    @govukButton(
+        ButtonViewModel(messages(continueMessage)).withAttribute(("id", "submit")).withAttribute("onclick", "showTheSpinner()")
+    )
+</div>

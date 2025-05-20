@@ -17,22 +17,10 @@
 package pages
 
 import controllers.routes
-import models.UserAnswers
 import play.api.mvc.Call
 
-object CheckYourAnswersPage extends CheckAnswersPage {
-
-  override def isTheSamePage(other: Page): Boolean = other match {
-    case CheckYourAnswersPage  => true
-    case _ => false
-  }
-
-  override val urlFragment: String = "check-your-answers"
-
+object ApplicationCompletePage extends Page {
   override def route(waypoints: Waypoints): Call =
-    routes.CheckYourAnswersController.onPageLoad()
-
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    ApplicationCompletePage
-  }
+    routes.ApplicationCompleteController.onPageLoad()
 }
+

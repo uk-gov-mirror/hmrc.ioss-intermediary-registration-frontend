@@ -11,6 +11,7 @@ site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
 site.tryAgain = Try again
+site.submit = Submit
 
 date.day = Day
 date.month = Month
@@ -420,3 +421,15 @@ bankDetails.ossWarning = Any changes you make here will also update the bank det
 bankDetails.ossAndIossWarning = Any changes you make here will also update the bank details in your One Stop Shop and previous Import One Stop Shop registrations.
 bankDetails.oneIossWarning = Any changes you make here will also update the bank details in your previous Import One Stop Shop registration.
 bankDetails.iossWarning = Any changes you make here will also update the bank details in all of your Import One Stop Shop registrations.
+
+applicationComplete.title = You are now registered as an IOSS intermediary
+applicationComplete.heading = You are now registered as an IOSS intermediary
+applicationComplete.reference = Your IOSS intermediary number is <br><span class="govuk-!-font-weight-bold">{0}</span>
+applicationComplete.registration.text = We''ve received your registration for <span class="govuk-!-font-weight-bold">{0}</span>
+applicationComplete.registration.p1 = You can now use this service to add clients to your account, then fill out monthly IOSS VAT returns and pay any VAT due.
+applicationComplete.next = What happens next
+applicationComplete.manageAccount = <a class="govuk-link" href="{0}">Go to your account to add and manage your clients.</a>
+applicationComplete.checkInformation.contact = We'’ll email you if we need to check any information.
+applicationComplete.checkInformation.info = Read more information about <a class="govuk-link" href="https://www.gov.uk/guidance/completing-an-import-one-stop-shop-vat-return">how to complete an IOSS return.</a>
+applicationComplete.feedback.link.text = What did you think of this service?
+applicationComplete.feedback.30seconds = (takes 30 seconds)
