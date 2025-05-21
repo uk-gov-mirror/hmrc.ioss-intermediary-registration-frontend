@@ -169,7 +169,7 @@ class EmailVerificationServiceSpec extends SpecBase {
 
       val result = emailVerificationService.isEmailVerified(contactDetails.emailAddress, userAnswersId).futureValue
 
-      result mustBe LockedTooManyLockedEmails
+      result mustBe LockedPasscodeForSingleEmail
 
     }
 
