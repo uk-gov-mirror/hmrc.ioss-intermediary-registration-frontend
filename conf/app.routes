@@ -55,6 +55,17 @@ POST        /registered-for-vat-in-uk                                       cont
 
 GET         /cannot-register-no-vat-in-uk                                   controllers.filters.CannotRegisterNoVatInUkController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
+
+GET         /cannot-register-not-ni-based-business        controllers.CannotRegisterNotNiBasedBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /expired-vrn-date                             controllers.ExpiredVrnDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /insufficient-enrolments                       controllers.auth.AuthController.insufficientEnrolments()
+
+# Filter questions section
+GET         /ioss-intermediary-registered                controllers.filters.RegisteredForIossIntermediaryInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /ioss-intermediary-registered                controllers.filters.RegisteredForIossIntermediaryInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
 GET         /ni-or-eu-based                                                 controllers.filters.BusinessBasedInNiOrEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /ni-or-eu-based                                                 controllers.filters.BusinessBasedInNiOrEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
@@ -151,6 +162,10 @@ POST        /remove-all-tax-details                                         cont
 # Contact details section
 GET         /contact-details                                                controllers.ContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /contact-details                                                controllers.ContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+
+# Other
+GET         /already-registered                           controllers.AlreadyRegisteredController.onPageLoad()
 
 # Bank details section
 GET         /bank-account-details                                           controllers.BankDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)

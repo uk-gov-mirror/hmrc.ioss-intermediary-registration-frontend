@@ -82,7 +82,8 @@ trait SpecBase
       desAddress = arbitraryDesAddress.arbitrary.sample.value,
       organisationName = Some("Company name"),
       individualName = None,
-      singleMarketIndicator = true
+      singleMarketIndicator = true,
+      deregistrationDecisionDate = None
     )
 
   protected def applicationBuilder(
@@ -102,6 +103,7 @@ trait SpecBase
         bind[AuthenticatedDataRetrievalAction].toInstance(new FakeAuthenticatedDataRetrievalAction(userAnswers, vrn)),
         bind[AuthenticatedDataRequiredActionImpl].toInstance(FakeAuthenticatedDataRequiredAction(userAnswers)),
         bind[UnauthenticatedDataRetrievalAction].toInstance(new FakeUnauthenticatedDataRetrievalAction(userAnswers)),
+        bind[CheckRegistrationFilterProvider].toInstance(new FakeCheckRegistrationFilterProvider()),
         bind[Clock].toInstance(clockToBind)
       )
   }

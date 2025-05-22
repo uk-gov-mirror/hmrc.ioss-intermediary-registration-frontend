@@ -437,7 +437,8 @@ trait ModelGenerators {
           registrationDate = registrationDate,
           organisationName = Some(organisationName),
           individualName = Some(individualName),
-          singleMarketIndicator = singleMarketIndicator
+          singleMarketIndicator = singleMarketIndicator,
+          deregistrationDecisionDate = None
         )
       }
     }

@@ -393,6 +393,18 @@ contactDetails.ossAndIossWarning = Any changes you make here will also update th
 contactDetails.oneIossWarning = Any changes you make here will also update the contact details in your previous Import One Stop Shop registration.
 contactDetails.iossWarning = Any changes you make here will also update the contact details in all of your Import One Stop Shop registrations.
 
+alreadyRegistered.title = Your account is already registered for this IOSS intermediary scheme
+alreadyRegistered.heading = Your account is already registered for this IOSS intermediary scheme
+alreadyRegistered.link = <a id="backToYourAccount" class="govuk-link">Continue to your account</a>
+
+cannotRegisterNotNiBasedBusiness.title = You cannot register for this service
+cannotRegisterNotNiBasedBusiness.heading = You cannot register for this service
+cannotRegisterNotNiBasedBusiness.p1 = To register as a Northern Ireland intermediary, your business trading address must be in Northern Ireland.
+
+expiredVrnDate.title = The VAT number for this account is no longer valid
+expiredVrnDate.heading = The VAT number for this account is no longer valid
+expiredVrnDate.link = <a href="https://www.gov.uk/register-for-vat/how-register-for-vat" class="govuk-link">Apply for a new VAT number to use this service</a>
+
 bankDetails.title = Enter your bank or building society account details
 bankDetails.heading = Enter your bank or building society account details
 bankDetails.previousOSS = We have added the details you entered for the One Stop Shop service. Check they are still correct.
@@ -433,3 +445,4 @@ applicationComplete.checkInformation.contact = We'’ll email you if we need to 
 applicationComplete.checkInformation.info = Read more information about <a class="govuk-link" href="https://www.gov.uk/guidance/completing-an-import-one-stop-shop-vat-return">how to complete an IOSS return.</a>
 applicationComplete.feedback.link.text = What did you think of this service?
 applicationComplete.feedback.30seconds = (takes 30 seconds)
+
