@@ -173,3 +173,8 @@ POST        /bank-account-details                                           cont
 
 # Other
 GET        /successful                                                      controllers.ApplicationCompleteController.onPageLoad()
+
+
+# Email verification section
+GET        /email-verification-codes-and-emails-exceeded                    controllers.EmailVerificationCodesAndEmailsExceededController.onPageLoad()
+GET        /email-verification-codes-exceeded                               controllers.EmailVerificationCodesExceededController.onPageLoad()
