@@ -14,26 +14,15 @@
  * limitations under the License.
  */
 
-package pages
+package queries.previousIntermediaryRegistrations
 
-import controllers.routes
-import models.UserAnswers
-import play.api.mvc.Call
+import models.previousIntermediaryRegistrations.PreviousIntermediaryRegistrationDetailsWithOptionalIntermediaryNumber
+import play.api.libs.json.JsPath
+import queries.{Gettable, Settable}
 
-object CheckYourAnswersPage extends CheckAnswersPage {
+object AllPreviousIntermediaryRegistrationsWithOptionalIntermediaryNumberQuery
+  extends Gettable[List[PreviousIntermediaryRegistrationDetailsWithOptionalIntermediaryNumber]]
+    with Settable[List[PreviousIntermediaryRegistrationDetailsWithOptionalIntermediaryNumber]] {
 
-  override def isTheSamePage(other: Page): Boolean = other match {
-    case CheckYourAnswersPage  => true
-    case _ => false
-  }
-
-  override val urlFragment: String = "check-your-answers"
-
-  override def route(waypoints: Waypoints): Call = {
-    routes.CheckYourAnswersController.onPageLoad()
-  }
-
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    ApplicationCompletePage
-  }
+  override def path: JsPath = JsPath \ "previousIntermediaryRegistrations"
 }

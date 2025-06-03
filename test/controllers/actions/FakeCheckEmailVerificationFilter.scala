@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package queries.tradingNames
+package controllers.actions
 
-import models.TradingName
-import play.api.libs.json.JsPath
-import queries.{Gettable, Settable}
+import config.FrontendAppConfig
+import org.scalatestplus.mockito.MockitoSugar.mock
+import services.EmailVerificationService
 
-object AllTradingNames extends Gettable[List[TradingName]] with Settable[List[TradingName]] {
+import scala.concurrent.ExecutionContext
 
-  override def path: JsPath = JsPath \ "tradingNames"
-}
+class FakeCheckEmailVerificationFilter extends CheckEmailVerificationFilterProvider(
+  mock[FrontendAppConfig],
+  mock[EmailVerificationService]
+)(ExecutionContext.Implicits.global)

@@ -18,13 +18,13 @@ package controllers.euDetails
 
 import base.SpecBase
 import models.euDetails.RegistrationType.VatNumber
-import models.{Country, Index, InternationalAddress, UserAnswers}
+import models.{Country, InternationalAddress, NormalMode, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.JourneyRecoveryPage
 import pages.euDetails.*
+import pages.{JourneyRecoveryPage, Waypoint, Waypoints}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -38,32 +38,33 @@ import views.html.euDetails.CheckEuDetailsAnswersView
 
 class CheckEuDetailsAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
-  private val countryIndex: Index = Index(0)
   private val euVatNumber: String = arbitraryEuVatNumber.sample.value
   private val countryCode: String = euVatNumber.substring(0, 2)
   private val country: Country = Country.euCountries.find(_.code == countryCode).head
   private val feTradingName: String = arbitraryTradingName.arbitrary.sample.value.name
   private val feAddress: InternationalAddress = arbitraryInternationalAddress.arbitrary.sample.value
 
-  private lazy val checkEuDetailsAnswersRoute = routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, countryIndex).url
-  private lazy val checkEuDetailsAnswersSubmitRoute = routes.CheckEuDetailsAnswersController.onSubmit(waypoints, countryIndex).url
+  private lazy val checkEuDetailsAnswersRoute = routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, countryIndex(0)).url
 
-  private val checkEuDetailsAnswersPage: CheckEuDetailsAnswersPage = CheckEuDetailsAnswersPage(countryIndex)
+  private def checkEuDetailsAnswersSubmitRoute(incompletePromptShown: Boolean = false) =
+    routes.CheckEuDetailsAnswersController.onSubmit(waypoints, countryIndex(0), incompletePromptShown = incompletePromptShown).url
 
-  private val updatedAnswers: UserAnswers = emptyUserAnswersWithVatInfo
+  private val checkEuDetailsAnswersPage: CheckEuDetailsAnswersPage = CheckEuDetailsAnswersPage(countryIndex(0))
+
+  private val answers: UserAnswers = emptyUserAnswersWithVatInfo
     .set(TaxRegisteredInEuPage, true).success.value
-    .set(EuCountryPage(countryIndex), country).success.value
-    .set(HasFixedEstablishmentPage(countryIndex), true).success.value
-    .set(RegistrationTypePage(countryIndex), VatNumber).success.value
-    .set(EuVatNumberPage(countryIndex), euVatNumber).success.value
-    .set(FixedEstablishmentTradingNamePage(countryIndex), feTradingName).success.value
-    .set(FixedEstablishmentAddressPage(countryIndex), feAddress).success.value
+    .set(EuCountryPage(countryIndex(0)), country).success.value
+    .set(HasFixedEstablishmentPage(countryIndex(0)), true).success.value
+    .set(RegistrationTypePage(countryIndex(0)), VatNumber).success.value
+    .set(EuVatNumberPage(countryIndex(0)), euVatNumber).success.value
+    .set(FixedEstablishmentTradingNamePage(countryIndex(0)), feTradingName).success.value
+    .set(FixedEstablishmentAddressPage(countryIndex(0)), feAddress).success.value
 
   "CheckEuDetailsAnswers Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(updatedAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(answers)).build()
 
       running(application) {
 
@@ -77,17 +78,50 @@ class CheckEuDetailsAnswersControllerSpec extends SpecBase with SummaryListFluen
 
         val summaryList: SummaryList = SummaryListViewModel(
           rows = Seq(
-            HasFixedEstablishmentSummary.row(waypoints, updatedAnswers, countryIndex, country, checkEuDetailsAnswersPage),
-            RegistrationTypeSummary.row(waypoints, updatedAnswers, countryIndex, checkEuDetailsAnswersPage),
-            EuVatNumberSummary.row(waypoints, updatedAnswers, countryIndex, checkEuDetailsAnswersPage),
-            EuTaxReferenceSummary.row(waypoints, updatedAnswers, countryIndex, checkEuDetailsAnswersPage),
-            FixedEstablishmentTradingNameSummary.row(waypoints, updatedAnswers, countryIndex, checkEuDetailsAnswersPage),
-            FixedEstablishmentAddressSummary.row(waypoints, updatedAnswers, countryIndex, checkEuDetailsAnswersPage)
+            HasFixedEstablishmentSummary.row(waypoints, answers, countryIndex(0), country, checkEuDetailsAnswersPage),
+            RegistrationTypeSummary.row(waypoints, answers, countryIndex(0), checkEuDetailsAnswersPage),
+            EuVatNumberSummary.row(waypoints, answers, countryIndex(0), checkEuDetailsAnswersPage),
+            EuTaxReferenceSummary.row(waypoints, answers, countryIndex(0), checkEuDetailsAnswersPage),
+            FixedEstablishmentTradingNameSummary.row(waypoints, answers, countryIndex(0), checkEuDetailsAnswersPage),
+            FixedEstablishmentAddressSummary.row(waypoints, answers, countryIndex(0), checkEuDetailsAnswersPage)
           ).flatten
         )
 
         status(result) `mustBe` OK
-        contentAsString(result) `mustBe` view(waypoints, countryIndex, country, summaryList)(request, messages(application)).toString
+        contentAsString(result) `mustBe` view(waypoints, countryIndex(0), country, summaryList, incomplete = false)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when there are incomplete answers" in {
+
+      val incompleteAnswers: UserAnswers = answers
+        .remove(EuVatNumberPage(countryIndex(0))).success.value
+
+      val application = applicationBuilder(userAnswers = Some(incompleteAnswers)).build()
+
+      running(application) {
+
+        implicit val msgs: Messages = messages(application)
+
+        val request = FakeRequest(GET, checkEuDetailsAnswersRoute)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[CheckEuDetailsAnswersView]
+
+        val summaryList: SummaryList = SummaryListViewModel(
+          rows = Seq(
+            HasFixedEstablishmentSummary.row(waypoints, incompleteAnswers, countryIndex(0), country, checkEuDetailsAnswersPage),
+            RegistrationTypeSummary.row(waypoints, incompleteAnswers, countryIndex(0), checkEuDetailsAnswersPage),
+            EuVatNumberSummary.row(waypoints, incompleteAnswers, countryIndex(0), checkEuDetailsAnswersPage),
+            EuTaxReferenceSummary.row(waypoints, incompleteAnswers, countryIndex(0), checkEuDetailsAnswersPage),
+            FixedEstablishmentTradingNameSummary.row(waypoints, incompleteAnswers, countryIndex(0), checkEuDetailsAnswersPage),
+            FixedEstablishmentAddressSummary.row(waypoints, incompleteAnswers, countryIndex(0), checkEuDetailsAnswersPage)
+          ).flatten
+        )
+
+        status(result) `mustBe` OK
+        contentAsString(result) `mustBe` view(waypoints, countryIndex(0), country, summaryList, incomplete = true)(request, messages(application)).toString
       }
     }
 
@@ -98,20 +132,40 @@ class CheckEuDetailsAnswersControllerSpec extends SpecBase with SummaryListFluen
       when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
       val application =
-        applicationBuilder(userAnswers = Some(updatedAnswers))
+        applicationBuilder(userAnswers = Some(answers))
           .overrides(
             bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
           )
           .build()
 
       running(application) {
-        val request = FakeRequest(POST, checkEuDetailsAnswersSubmitRoute)
+        val request = FakeRequest(POST, checkEuDetailsAnswersSubmitRoute())
 
         val result = route(application, request).value
 
         status(result) `mustBe` SEE_OTHER
-        redirectLocation(result).value `mustBe` CheckEuDetailsAnswersPage(countryIndex)
-          .navigate(waypoints, updatedAnswers, updatedAnswers).url
+        redirectLocation(result).value `mustBe` CheckEuDetailsAnswersPage(countryIndex(0))
+          .navigate(waypoints, answers, answers).url
+      }
+    }
+
+    "must redirect to the corresponding incomplete answer page for a POST when there are incomplete answers" in {
+
+      val incompleteAnswers: UserAnswers = answers
+        .remove(EuVatNumberPage(countryIndex(0))).success.value
+
+      val application = applicationBuilder(userAnswers = Some(incompleteAnswers)).build()
+
+      running(application) {
+
+        val request = FakeRequest(POST, checkEuDetailsAnswersSubmitRoute(incompletePromptShown = true))
+
+        val result = route(application, request).value
+
+        val updatedWaypoints: Waypoints = waypoints.setNextWaypoint(Waypoint(checkEuDetailsAnswersPage, NormalMode, checkEuDetailsAnswersPage.urlFragment))
+
+        status(result) `mustBe` SEE_OTHER
+        redirectLocation(result).value `mustBe` EuVatNumberPage(countryIndex(0)).route(updatedWaypoints).url
       }
     }
 
@@ -134,7 +188,7 @@ class CheckEuDetailsAnswersControllerSpec extends SpecBase with SummaryListFluen
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(POST, checkEuDetailsAnswersSubmitRoute)
+        val request = FakeRequest(POST, checkEuDetailsAnswersSubmitRoute())
 
         val result = route(application, request).value
 

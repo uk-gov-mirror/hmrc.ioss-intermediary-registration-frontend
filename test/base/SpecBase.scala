@@ -22,16 +22,19 @@ import models.domain.VatCustomerInfo
 import models.emailVerification.{EmailVerificationRequest, VerifyEmail}
 import models.iossRegistration.IossEtmpDisplayRegistration
 import models.ossRegistration.*
-import models.{BankDetails, Bic, ContactDetails, DesAddress, Iban, UserAnswers}
+import models.{BankDetails, Bic, ContactDetails, DesAddress, Iban, Index, TradingName, UserAnswers}
 import org.scalatest
 import org.scalatest.EitherValues.*
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{OptionValues, TryValues}
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
+import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.RegisteredForIossIntermediaryInEuPage
-import pages.tradingNames.HasTradingNamePage
+import pages.previousIntermediaryRegistrations.HasPreviouslyRegisteredAsIntermediaryPage
+import pages.tradingNames.{HasTradingNamePage, TradingNamePage}
 import pages.{BankDetailsPage, ContactDetailsPage, EmptyWaypoints, Waypoints}
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
@@ -41,6 +44,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.CSRFTokenHelper.CSRFRequest
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.retrieve.Credentials
+import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.domain.Vrn
 
 import java.time.{Clock, Instant, LocalDate, ZoneId}
@@ -54,12 +58,17 @@ trait SpecBase
     with IntegrationPatience
     with Generators {
 
+  def countryIndex(index: Int): Index = Index(index)
+
   val userAnswersId: String = "12345-credId"
+  val vrn: Vrn = Vrn("123456789")
 
   lazy val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest("", "/endpoint").withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 
   def testCredentials: Credentials = Credentials(userAnswersId, "GGW")
+
+  def testEnrolments: Enrolments = Enrolments(Set(Enrolment("HMRC-MTD-VAT", Seq(EnrolmentIdentifier("VRN", vrn.vrn)), "Activated")))
 
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, lastUpdated = arbitraryInstant)
 
@@ -68,9 +77,15 @@ trait SpecBase
   def basicUserAnswersWithVatInfo: UserAnswers = emptyUserAnswersWithVatInfo
     .set(RegisteredForIossIntermediaryInEuPage, false).success.value
 
+  val iban: Iban = Iban("GB33BUKB20201555555555").value
+  val bic: Bic = Bic("ABCDGB2A").get
+
   def completeUserAnswersWithVatInfo: UserAnswers =
     basicUserAnswersWithVatInfo
-      .set(HasTradingNamePage, false).success.value
+      .set(HasTradingNamePage, true).success.value
+      .set(TradingNamePage(countryIndex(0)), TradingName("Test trading name")).success.value
+      .set(HasPreviouslyRegisteredAsIntermediaryPage, false).success.value
+      .set(TaxRegisteredInEuPage, false).success.value
       .set(ContactDetailsPage, ContactDetails("fullName", "0123456789", "testEmail@example.com")).success.value
       .set(BankDetailsPage, BankDetails("Account name", Some(bic), iban)).success.value
 
@@ -79,10 +94,7 @@ trait SpecBase
   val arbitraryInstant: Instant = arbitraryDate.arbitrary.sample.value.atStartOfDay(ZoneId.systemDefault()).toInstant
   val stubClockAtArbitraryDate: Clock = Clock.fixed(arbitraryInstant, ZoneId.systemDefault())
 
-  val vrn: Vrn = Vrn("123456789")
   val iossNumber: String = "IM9001234567"
-  val iban: Iban = Iban("GB33BUKB20201555555555").value
-  val bic: Bic = Bic("ABCDGB2A").get
 
   val waypoints: Waypoints = EmptyWaypoints
 
@@ -114,6 +126,7 @@ trait SpecBase
         bind[AuthenticatedDataRequiredActionImpl].toInstance(FakeAuthenticatedDataRequiredAction(userAnswers)),
         bind[UnauthenticatedDataRetrievalAction].toInstance(new FakeUnauthenticatedDataRetrievalAction(userAnswers)),
         bind[CheckRegistrationFilterProvider].toInstance(new FakeCheckRegistrationFilterProvider()),
+        bind[CheckEmailVerificationFilterProvider].toInstance(new FakeCheckEmailVerificationFilter()),
         bind[Clock].toInstance(clockToBind)
       )
   }
@@ -159,7 +172,7 @@ trait SpecBase
     telephoneNumber = "0111 2223334",
     emailAddress = "email@example.com"
   )
-  
+
   val verifyEmail: VerifyEmail = VerifyEmail(
     address = contactDetails.emailAddress,
     enterUrl = "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details"
