@@ -14,17 +14,25 @@
  * limitations under the License.
  */
 
-package config
+package pages
 
-object Constants {
+import controllers.routes
+import models.{UkAddress, UserAnswers}
+import pages.tradingNames.HasTradingNamePage
+import play.api.libs.json.JsPath
+import play.api.mvc.Call
 
-  val maxTradingNames: Int = 10
-  val iossEnrolmentKey: String = "IOSSNumber"
+case object NiAddressPage extends QuestionPage[UkAddress] {
 
-  val addQuarantineYears: Int = 2
+  override def path: JsPath = JsPath \ toString
 
-  val fixedEstablishmentTradingNameMaxLength: Int = 40
-  val emailVerificationMaxEmails: Int = 10
-  
-  val niPostCodeAreaPrefix: String = "BT"
+  override def toString: String = "niAddress"
+
+  override def route(waypoints: Waypoints): Call = {
+    routes.NiAddressController.onPageLoad(waypoints)
+  }
+
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
+    HasTradingNamePage
+  }
 }
