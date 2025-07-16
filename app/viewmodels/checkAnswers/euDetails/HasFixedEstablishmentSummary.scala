@@ -16,7 +16,7 @@
 
 package viewmodels.checkAnswers.euDetails
 
-import models.{Country, Index, UserAnswers}
+import models.UserAnswers
 import pages.euDetails.HasFixedEstablishmentPage
 import pages.{CheckAnswersPage, Waypoints}
 import play.api.i18n.Messages
@@ -29,11 +29,9 @@ object HasFixedEstablishmentSummary {
   def row(
            waypoints: Waypoints,
            answers: UserAnswers,
-           countryIndex: Index,
-           country: Country,
            sourcePage: CheckAnswersPage
          )(implicit messages: Messages): Option[SummaryListRow] = {
-    answers.get(HasFixedEstablishmentPage(countryIndex)).map { answer =>
+    answers.get(HasFixedEstablishmentPage()).map { answer =>
 
       val value = if (answer) "site.yes" else "site.no"
 
@@ -41,8 +39,8 @@ object HasFixedEstablishmentSummary {
         key = "hasFixedEstablishment.checkYourAnswersLabel",
         value = ValueViewModel(value),
         actions = Seq(
-          ActionItemViewModel("site.change", HasFixedEstablishmentPage(countryIndex).changeLink(waypoints, sourcePage).url)
-            .withVisuallyHiddenText(messages("hasFixedEstablishment.change.hidden", country))
+          ActionItemViewModel("site.change", HasFixedEstablishmentPage().changeLink(waypoints, sourcePage).url)
+            .withVisuallyHiddenText(messages("hasFixedEstablishment.change.hidden"))
         )
       )
     }

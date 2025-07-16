@@ -18,24 +18,36 @@ package pages.euDetails
 
 import controllers.euDetails.routes
 import models.{Index, UserAnswers}
-import pages.{Page, QuestionPage, RecoveryOps, Waypoints}
+import pages.{ContactDetailsPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, RecoveryOps, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
+import queries.euDetails.AllEuDetailsQuery
+import utils.CheckWaypoints.CheckWaypointsOps
 
-case class HasFixedEstablishmentPage(countryIndex: Index) extends QuestionPage[Boolean] {
+case class HasFixedEstablishmentPage() extends QuestionPage[Boolean] {
 
-  override def path: JsPath = JsPath \ "euDetails" \ countryIndex.position \ toString
+  override def path: JsPath = JsPath \ toString
 
   override def toString: String = "hasFixedEstablishment"
 
   override def route(waypoints: Waypoints): Call = {
-    routes.HasFixedEstablishmentController.onPageLoad(waypoints, countryIndex)
+    routes.HasFixedEstablishmentController.onPageLoad(waypoints)
   }
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     answers.get(this).map {
-      case true => RegistrationTypePage(countryIndex)
-      case false => CannotRegisterNoFixedEstablishmentPage(countryIndex)
+      case true => EuCountryPage(Index(0))
+      case false => ContactDetailsPage
     }.orRecover
+  }
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
+    (answers.get(this), answers.get(AllEuDetailsQuery)) match {
+      case (Some(true), Some(euDetails)) if euDetails.nonEmpty => AddEuDetailsPage()
+      case (Some(true), _) => EuCountryPage(Index(0))
+      case (Some(false), Some(euDetails)) if euDetails.nonEmpty => DeleteAllEuDetailsPage
+      case (Some(false), _) => waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(JourneyRecoveryPage)
+      case _ => JourneyRecoveryPage
+    }
   }
 }

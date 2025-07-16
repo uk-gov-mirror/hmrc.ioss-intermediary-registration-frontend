@@ -23,7 +23,7 @@ import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.JourneyRecoveryPage
-import pages.euDetails.{EuCountryPage, HasFixedEstablishmentPage, TaxRegisteredInEuPage}
+import pages.euDetails.{EuCountryPage, HasFixedEstablishmentPage}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -37,13 +37,12 @@ class HasFixedEstablishmentControllerSpec extends SpecBase with MockitoSugar {
   private val country: Country = arbitraryCountry.arbitrary.sample.value
 
   private val updatedAnswers: UserAnswers = emptyUserAnswersWithVatInfo
-    .set(TaxRegisteredInEuPage, true).success.value
     .set(EuCountryPage(countryIndex(0)), country).success.value
 
   private val formProvider = new HasFixedEstablishmentFormProvider()
-  private val form: Form[Boolean] = formProvider(country)
+  private val form: Form[Boolean] = formProvider()
 
-  private lazy val hasFixedEstablishmentRoute: String = routes.HasFixedEstablishmentController.onPageLoad(waypoints, countryIndex(0)).url
+  private lazy val hasFixedEstablishmentRoute: String = routes.HasFixedEstablishmentController.onPageLoad(waypoints).url
 
   "HasFixedEstablishment Controller" - {
 
@@ -59,13 +58,13 @@ class HasFixedEstablishmentControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[HasFixedEstablishmentView]
 
         status(result) `mustBe` OK
-        contentAsString(result) `mustBe` view(form, waypoints, countryIndex(0), country)(request, messages(application)).toString
+        contentAsString(result) `mustBe` view(form, waypoints)(request, messages(application)).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = updatedAnswers.set(HasFixedEstablishmentPage(countryIndex(0)), true).success.value
+      val userAnswers = updatedAnswers.set(HasFixedEstablishmentPage(), true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -77,7 +76,7 @@ class HasFixedEstablishmentControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) `mustBe` OK
-        contentAsString(result) `mustBe` view(form.fill(true), waypoints, countryIndex(0), country)(request, messages(application)).toString
+        contentAsString(result) `mustBe` view(form.fill(true), waypoints)(request, messages(application)).toString
       }
     }
 
@@ -102,10 +101,10 @@ class HasFixedEstablishmentControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         val expectedAnswers: UserAnswers = updatedAnswers
-          .set(HasFixedEstablishmentPage(countryIndex(0)), true).success.value
+          .set(HasFixedEstablishmentPage(), true).success.value
 
         status(result) `mustBe` SEE_OTHER
-        redirectLocation(result).value `mustBe` HasFixedEstablishmentPage(countryIndex(0))
+        redirectLocation(result).value `mustBe` HasFixedEstablishmentPage()
           .navigate(waypoints, updatedAnswers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
@@ -127,7 +126,7 @@ class HasFixedEstablishmentControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) `mustBe` BAD_REQUEST
-        contentAsString(result) `mustBe` view(boundForm, waypoints, countryIndex(0), country)(request, messages(application)).toString
+        contentAsString(result) `mustBe` view(boundForm, waypoints)(request, messages(application)).toString
       }
     }
 

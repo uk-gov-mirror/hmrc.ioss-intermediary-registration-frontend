@@ -19,7 +19,7 @@ package controllers.euDetails
 import base.SpecBase
 import forms.euDetails.DeleteEuDetailsFormProvider
 import models.euDetails.RegistrationType.VatNumber
-import models.{Country, InternationalAddress, UserAnswers}
+import models.{Country, InternationalAddressWithTradingName, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
 import org.scalatestplus.mockito.MockitoSugar
@@ -40,7 +40,7 @@ class DeleteEuDetailsControllerSpec extends SpecBase with MockitoSugar {
   private val countryCode: String = euVatNumber.substring(0, 2)
   private val country: Country = Country.euCountries.find(_.code == countryCode).head
   private val feTradingName: String = arbitraryTradingName.arbitrary.sample.value.name
-  private val feAddress: InternationalAddress = arbitraryInternationalAddress.arbitrary.sample.value
+  private val feAddress: InternationalAddressWithTradingName = arbitraryInternationalAddressWithTradingName.arbitrary.sample.value
 
   private val formProvider = new DeleteEuDetailsFormProvider()
   private val form: Form[Boolean] = formProvider(country)
@@ -48,13 +48,11 @@ class DeleteEuDetailsControllerSpec extends SpecBase with MockitoSugar {
   private lazy val deleteEuDetailsRoute: String = routes.DeleteEuDetailsController.onPageLoad(waypoints, countryIndex(0)).url
 
   private val updatedAnswers: UserAnswers = emptyUserAnswersWithVatInfo
-    .set(TaxRegisteredInEuPage, true).success.value
+    .set(HasFixedEstablishmentPage(), true).success.value
+    .set(FixedEstablishmentAddressPage(countryIndex(0)), feAddress).success.value
     .set(EuCountryPage(countryIndex(0)), country).success.value
-    .set(HasFixedEstablishmentPage(countryIndex(0)), true).success.value
     .set(RegistrationTypePage(countryIndex(0)), VatNumber).success.value
     .set(EuVatNumberPage(countryIndex(0)), euVatNumber).success.value
-    .set(FixedEstablishmentTradingNamePage(countryIndex(0)), feTradingName).success.value
-    .set(FixedEstablishmentAddressPage(countryIndex(0)), feAddress).success.value
 
   "DeleteEuDetails Controller" - {
 
@@ -111,12 +109,11 @@ class DeleteEuDetailsControllerSpec extends SpecBase with MockitoSugar {
       val country2: Country = Country.euCountries.find(_.code == countryCode2).head
 
       val answers: UserAnswers = updatedAnswers
+        .set(HasFixedEstablishmentPage(), true).success.value
         .set(EuCountryPage(countryIndex(1)), country2).success.value
-        .set(HasFixedEstablishmentPage(countryIndex(1)), true).success.value
+        .set(FixedEstablishmentAddressPage(countryIndex(1)), feAddress).success.value
         .set(RegistrationTypePage(countryIndex(1)), VatNumber).success.value
         .set(EuVatNumberPage(countryIndex(1)), euVatNumber2).success.value
-        .set(FixedEstablishmentTradingNamePage(countryIndex(1)), feTradingName).success.value
-        .set(FixedEstablishmentAddressPage(countryIndex(1)), feAddress).success.value
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 

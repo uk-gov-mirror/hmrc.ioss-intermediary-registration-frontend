@@ -62,16 +62,12 @@ trait PageGenerators {
     Arbitrary(DeleteAllPreviousIntermediaryRegistrationsPage)
   }
 
-  implicit lazy val arbitraryTaxRegisteredInEuPage: Arbitrary[TaxRegisteredInEuPage.type] = {
-    Arbitrary(TaxRegisteredInEuPage)
-  }
-
   implicit lazy val arbitraryEuCountryPage: Arbitrary[EuCountryPage] = {
     Arbitrary(EuCountryPage(Index(0)))
   }
 
   implicit lazy val arbitraryHasFixedEstablishmentPage: Arbitrary[HasFixedEstablishmentPage] = {
-    Arbitrary(HasFixedEstablishmentPage(Index(0)))
+    Arbitrary(HasFixedEstablishmentPage())
   }
 
   implicit lazy val arbitraryRegistrationTypePage: Arbitrary[RegistrationTypePage] = {
@@ -84,10 +80,6 @@ trait PageGenerators {
 
   implicit lazy val arbitraryEuTaxReferencePage: Arbitrary[EuTaxReferencePage] = {
     Arbitrary(EuTaxReferencePage(Index(0)))
-  }
-
-  implicit lazy val arbitraryFixedEstablishmentTradingNamePage: Arbitrary[FixedEstablishmentTradingNamePage] = {
-    Arbitrary(FixedEstablishmentTradingNamePage(Index(0)))
   }
 
   implicit lazy val arbitraryFixedEstablishmentAddressPage: Arbitrary[FixedEstablishmentAddressPage] = {

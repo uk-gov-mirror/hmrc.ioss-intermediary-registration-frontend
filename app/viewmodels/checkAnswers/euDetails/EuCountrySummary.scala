@@ -16,27 +16,38 @@
 
 package viewmodels.checkAnswers.euDetails
 
-import models.UserAnswers
-import pages.euDetails.TaxRegisteredInEuPage
+import models.{Index, UserAnswers}
+import pages.euDetails.EuCountryPage
 import pages.{CheckAnswersPage, Waypoints}
 import play.api.i18n.Messages
+import play.twirl.api.HtmlFormat
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object TaxRegisteredInEuSummary {
+object EuCountrySummary {
 
-  def checkAnswersRow(waypoints: Waypoints, answers: UserAnswers, sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] = {
-    answers.get(TaxRegisteredInEuPage).map { answer =>
+  def row(
+           waypoints: Waypoints,
+           answers: UserAnswers,
+           countryIndex: Index,
+           sourcePage: CheckAnswersPage
+         )(implicit messages: Messages): Option[SummaryListRow] = {
+    answers.get(EuCountryPage(countryIndex)).map { answer =>
 
-      val value = if (answer) "site.yes" else "site.no"
+      val value = ValueViewModel(
+        HtmlContent(
+          HtmlFormat.escape(messages(s"${answer.name}"))
+        )
+      )
 
       SummaryListRowViewModel(
-        key = "taxRegisteredInEu.checkYourAnswersLabel",
-        value = ValueViewModel(value),
+        key = "euCountry.checkYourAnswersLabel",
+        value = value,
         actions = Seq(
-          ActionItemViewModel("site.change", TaxRegisteredInEuPage.changeLink(waypoints, sourcePage).url)
-            .withVisuallyHiddenText(messages("taxRegisteredInEu.change.hidden"))
+          ActionItemViewModel("site.change", EuCountryPage(countryIndex).changeLink(waypoints, sourcePage).url)
+            .withVisuallyHiddenText(messages("euCountry.change.hidden"))
         )
       )
     }
