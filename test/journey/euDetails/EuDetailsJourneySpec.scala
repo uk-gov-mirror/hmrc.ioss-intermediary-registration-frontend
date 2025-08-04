@@ -20,10 +20,11 @@ import base.SpecBase
 import generators.Generators
 import journey.JourneyHelpers
 import models.euDetails.RegistrationType.{TaxId, VatNumber}
-import models.{Country, Index, InternationalAddressWithTradingName}
+import models.{CheckMode, Country, Index, InternationalAddressWithTradingName}
 import org.scalatest.freespec.AnyFreeSpec
+import pages.amend.ChangeRegistrationPage
 import pages.euDetails.*
-import pages.{CheckYourAnswersPage, ContactDetailsPage}
+import pages.{CheckYourAnswersPage, ContactDetailsPage, EmptyWaypoints, Waypoint, Waypoints}
 import queries.euDetails.{AllEuDetailsRawQuery, EuDetailsQuery}
 
 class EuDetailsJourneySpec extends SpecBase with JourneyHelpers with Generators {
@@ -53,6 +54,8 @@ class EuDetailsJourneySpec extends SpecBase with JourneyHelpers with Generators 
     setUserAnswerTo(AddEuDetailsPage(Some(countryIndex(1))), false),
     goTo(CheckYourAnswersPage)
   )
+
+  private val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
   "must go directly to add Business Contact Details page if not registered for VAT in any EU countries" in {
     startingFrom(HasFixedEstablishmentPage)
@@ -279,5 +282,41 @@ class EuDetailsJourneySpec extends SpecBase with JourneyHelpers with Generators 
         }
       }
     }
+
+    "must navigate when inAmend" - {
+
+      "when the user is on the Check Your Answers page and they change their original answer of being registered for tax in other EU countries to No" - {
+
+        "but answer yes when asked if they want to remove all EU registrations from the scheme" in {
+
+          startingFrom(ChangeRegistrationPage, waypoints)
+            .run(
+              initialise,
+              goToChangeAnswer(HasFixedEstablishmentPage),
+              submitAnswer(HasFixedEstablishmentPage, false),
+              pageMustBe(DeleteAllEuDetailsPage),
+              submitAnswer(DeleteAllEuDetailsPage, true),
+              removeAddToListItem(AllEuDetailsRawQuery),
+              answersMustNotContain(EuCountryPage(countryIndex(0))),
+              answersMustNotContain(EuCountryPage(countryIndex(1)))
+            )
+        }
+
+        "but answer no when asked if they want to remove all EU registrations from the scheme" in {
+
+          startingFrom(ChangeRegistrationPage, waypoints)
+            .run(
+              initialise,
+              goToChangeAnswer(HasFixedEstablishmentPage),
+              submitAnswer(HasFixedEstablishmentPage, false),
+              pageMustBe(DeleteAllEuDetailsPage),
+              submitAnswer(DeleteAllEuDetailsPage, false),
+              pageMustBe(ChangeRegistrationPage),
+              answersMustContain(EuCountryPage(countryIndex(0))),
+              answersMustContain(EuCountryPage(countryIndex(1)))
+            )
+        }
+      }
+      }
   }
 }
