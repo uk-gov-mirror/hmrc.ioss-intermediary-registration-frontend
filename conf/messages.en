@@ -12,7 +12,9 @@ site.signIn = Sign in
 site.govuk = GOV.UK
 site.tryAgain = Try again
 site.submit = Register
+site.confirm = Confirm
 site.warning = Warning
+site.processing = We are processing your registration.
 
 date.day = Day
 date.month = Month
@@ -511,8 +513,30 @@ niAddress.error.postCode.length = Postcode must be 40 characters or less
 niAddress.error.postCode.invalid = Postcode must only include letters, numbers and spaces
 niAddress.change.hidden = your business address in Northern Ireland
 
+changeRegistration.title = Change your registration
+changeRegistration.heading = Change your registration
+changeRegistration.reference = IOSS intermediary number: {0}
+changeRegistration.toCurrentRegistration = Return to your current registration
+changeRegistration.details.heading = Import One Stop Shop details
+changeRegistration.info.p1 = Confirm these changes to save them to your account.
+changeRegistration.intermediaryNumber = IOSS intermediary number: IN9001234567
+
+cancelAmendRegistration.title = Do you want to delete your changes?
+cancelAmendRegistration.heading = Do you want to delete your changes?
+cancelAmendRegistration.warning = This will delete any changes that you have not saved.
+cancelAmendRegistration.error.required = Select yes if you want to remove the changes to your registration
+cancelAmendRegistration.link = Cancel
+
+amendComplete.title = Registration details confirmed
+amendComplete.heading = Registration details confirmed
+amendComplete.info.noChanges = You have not changed any of your registration details.
+amendComplete.contact.text = We will contact you if we need to check any information.
+amendComplete.feedback.link.text = What did you think of this service?
+amendComplete.feedback.30seconds = (takes 30 seconds)
+
 errorSubmittingRegistration.title = We have a problem with our service right now
 errorSubmittingRegistration.heading = Your registration is not submitted
 errorSubmittingRegistration.p1 = We have not saved your answers.
 errorSubmittingRegistration.tryAgainLater = You can <a class="govuk-link" href={0}>try again later</a>.
 errorSubmittingRegistration.contactUs = If the problem continues, you can email us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
+
