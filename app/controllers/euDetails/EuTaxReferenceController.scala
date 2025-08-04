@@ -25,6 +25,7 @@ import pages.euDetails.EuTaxReferencePage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import utils.FutureSyntax.FutureOps
 import views.html.euDetails.EuTaxReferenceView
 import services.core.CoreRegistrationValidationService
@@ -44,7 +45,7 @@ class EuTaxReferenceController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
 
-  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData().async {
+  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
 
       getCountry(waypoints, countryIndex) { country =>
@@ -60,7 +61,7 @@ class EuTaxReferenceController @Inject()(
       }
   }
 
-  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData().async {
+  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
 
       getCountry(waypoints, countryIndex) { country =>
@@ -82,8 +83,14 @@ class EuTaxReferenceController @Inject()(
                   )
                 )
 
-              case Some(activeMatch) if activeMatch.traderId.isAnIntermediary && activeMatch.matchType.isQuarantinedTrader =>
+              case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader && waypoints.inAmend =>
+                for {
+                  updateAnswers <- Future.fromTry(request.userAnswers.set(EuTaxReferencePage(countryIndex), euTaxRef))
+                  _ <- cc.sessionRepository.set(updateAnswers)
+                } yield Redirect(EuTaxReferencePage(countryIndex).navigate(waypoints, request.userAnswers, updateAnswers).route)
 
+
+              case Some(activeMatch) if activeMatch.traderId.isAnIntermediary && activeMatch.matchType.isQuarantinedTrader =>
                 Future.successful(
                   Redirect(
                     controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
@@ -92,6 +99,7 @@ class EuTaxReferenceController @Inject()(
                     )
                   )
                 )
+
               case _ =>
                 for {
                   updatedAnswers <- Future.fromTry(request.userAnswers.set(EuTaxReferencePage(countryIndex), euTaxRef))

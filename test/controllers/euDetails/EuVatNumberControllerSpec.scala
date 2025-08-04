@@ -21,12 +21,13 @@ import forms.euDetails.EuVatNumberFormProvider
 import models.core.MatchType.*
 import models.core.{Match, MatchType, TraderId}
 import models.euDetails.RegistrationType.VatNumber
-import models.{Country, CountryWithValidationDetails, UserAnswers}
+import models.{CheckMode, Country, CountryWithValidationDetails, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.prop.TableDrivenPropertyChecks.*
 import org.scalatestplus.mockito.MockitoSugar
-import pages.JourneyRecoveryPage
+import pages.amend.ChangeRegistrationPage
+import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoint, Waypoints}
 import pages.euDetails.*
 import play.api.Application
 import play.api.data.Form
@@ -49,8 +50,10 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar {
 
   private val formProvider = new EuVatNumberFormProvider()
   private val form: Form[String] = formProvider(country)
+  private val amendWaypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
   private lazy val euVatNumberRoute: String = routes.EuVatNumberController.onPageLoad(waypoints, countryIndex(0)).url
+  private lazy val amendEuVatNumberSubmitRoute: String = routes.EuVatNumberController.onSubmit(amendWaypoints, countryIndex(0)).url
 
   private val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
 
@@ -279,6 +282,116 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar {
           redirectLocation(result).value mustEqual controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(quarantinedIntermediaryMatch.memberState, quarantinedIntermediaryMatch.getEffectiveDate).url
         }
       }
+    }
+
+    "inAmend" - {
+
+      "must not redirect to OtherCountryExcludedAndQuarantinedController page when the vat number is excluded for match FixedEstablishmentQuarantinedNETP " in {
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+        when(mockSessionRepository.set(any())) thenReturn true.toFuture
+
+        val application =
+          applicationBuilder(userAnswers = Some(updatedAnswers))
+            .overrides(
+              bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository),
+              bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+            )
+            .build()
+
+        running(application) {
+          val quarantinedMatch = createMatchResponse(
+            matchType = FixedEstablishmentQuarantinedNETP,
+            traderId = TraderId("IN333333333")
+          )
+
+          when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(euVatNumber), eqTo(country.code))(any(), any()))
+            .thenReturn(Future.successful(Some(quarantinedMatch)))
+
+          val request = FakeRequest(POST, amendEuVatNumberSubmitRoute)
+            .withFormUrlEncodedBody(("value", euVatNumber))
+
+          val result = route(application, request).value
+
+          val expectedAnswers = updatedAnswers.set(EuVatNumberPage(countryIndex(0)), euVatNumber).success.value
+          status(result) `mustBe` SEE_OTHER
+          redirectLocation(result).value mustBe controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(amendWaypoints, countryIndex(0)).url
+          verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+        }
+      }
+
+      "must not redirect to OtherCountryExcludedAndQuarantinedController page when the vat number is excluded for match TraderIdQuarantinedNETP " in {
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+        when(mockSessionRepository.set(any())) thenReturn true.toFuture
+
+        val application =
+          applicationBuilder(userAnswers = Some(updatedAnswers))
+            .overrides(
+              bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository),
+              bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+            )
+            .build()
+
+        running(application) {
+          val quarantinedMatch = createMatchResponse(
+            matchType = TraderIdQuarantinedNETP,
+            traderId = TraderId("IN333333333")
+          )
+
+          when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(euVatNumber), eqTo(country.code))(any(), any()))
+            .thenReturn(Future.successful(Some(quarantinedMatch)))
+
+          val request = FakeRequest(POST, amendEuVatNumberSubmitRoute)
+            .withFormUrlEncodedBody(("value", euVatNumber))
+
+          val result = route(application, request).value
+
+          val expectedAnswers = updatedAnswers.set(EuVatNumberPage(countryIndex(0)), euVatNumber).success.value
+          status(result) `mustBe` SEE_OTHER
+          redirectLocation(result).value mustBe controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(amendWaypoints, countryIndex(0)).url
+          verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+        }
+      }
+
+      "must not redirect to OtherCountryExcludedAndQuarantinedController page when the vat number is excluded for match OtherMSNETPQuarantinedNETP " in {
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+        when(mockSessionRepository.set(any())) thenReturn true.toFuture
+
+        val application =
+          applicationBuilder(userAnswers = Some(updatedAnswers))
+            .overrides(
+              bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository),
+              bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+            )
+            .build()
+
+        running(application) {
+          val quarantinedMatch = createMatchResponse(
+            matchType = OtherMSNETPQuarantinedNETP,
+            traderId = TraderId("IN333333333")
+          )
+
+          when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(euVatNumber), eqTo(country.code))(any(), any()))
+            .thenReturn(Future.successful(Some(quarantinedMatch)))
+
+          val request = FakeRequest(POST, amendEuVatNumberSubmitRoute)
+            .withFormUrlEncodedBody(("value", euVatNumber))
+
+          val result = route(application, request).value
+
+          val expectedAnswers = updatedAnswers.set(EuVatNumberPage(countryIndex(0)), euVatNumber).success.value
+          status(result) `mustBe` SEE_OTHER
+          redirectLocation(result).value mustBe controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(amendWaypoints, countryIndex(0)).url
+          verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+        }
+
+      }
+
     }
   }
 }
