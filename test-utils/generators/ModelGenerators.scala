@@ -22,18 +22,17 @@ import models.checkVatDetails.CheckVatDetails
 import models.domain.ModelHelpers.normaliseSpaces
 import models.domain.VatCustomerInfo
 import models.enrolments.{EACDEnrolment, EACDEnrolments, EACDIdentifiers}
-import models.etmp.*
 import models.euDetails.{EuDetails, RegistrationType}
 import models.iossRegistration.*
 import models.ossRegistration.*
-import models.previousIntermediaryRegistrations.{IntermediaryIdentificationNumberValidation, PreviousIntermediaryRegistrationDetails, PreviousIntermediaryRegistrationDetailsWithOptionalIntermediaryNumber}
-import org.scalacheck.{Arbitrary, Gen}
+import models.previousIntermediaryRegistrations.{IntermediaryIdentificationNumberValidation, NonCompliantDetails, PreviousIntermediaryRegistrationDetails, PreviousIntermediaryRegistrationDetailsWithOptionalIntermediaryNumber}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN, option}
+import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.domain.Vrn
 
-import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
 import java.time.temporal.ChronoUnit
+import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
 
 trait ModelGenerators extends EtmpModelGenerators {
 
@@ -543,6 +542,20 @@ trait ModelGenerators extends EtmpModelGenerators {
         chars <- listOfN(length, Gen.numChar)
       } yield chars.mkString).suchThat(_.trim.nonEmpty)
   }
+  
+  implicit lazy val arbitraryNonCompliantDetails: Arbitrary[NonCompliantDetails] = {
+    Arbitrary {
+      for {
+        nonCompliantReturns <- option(arbitrary[Int])
+        nonCompliantPayments <- option(arbitrary[Int])
+      } yield {
+        NonCompliantDetails(
+          nonCompliantReturns = nonCompliantReturns,
+          nonCompliantPayments = nonCompliantPayments
+        )
+      }
+    }
+  }
 
   implicit lazy val arbitraryPreviousIntermediaryRegistrationDetails: Arbitrary[PreviousIntermediaryRegistrationDetails] = {
     Arbitrary {
@@ -551,9 +564,11 @@ trait ModelGenerators extends EtmpModelGenerators {
         country = IntermediaryIdentificationNumberValidation.euCountriesWithIntermediaryValidationRules
           .find(_.vrnRegex.contains(countryPrefix)).map(_.country).head
         number <- numStringWithFixedLength(intermediaryNumberFixedLength)
+        nonCompliantDetails <- arbitraryNonCompliantDetails.arbitrary
       } yield PreviousIntermediaryRegistrationDetails(
         previousEuCountry = country,
-        previousIntermediaryNumber = s"$countryPrefix$number"
+        previousIntermediaryNumber = s"$countryPrefix$number",
+        nonCompliantDetails = Some(nonCompliantDetails)
       )
     }
   }
