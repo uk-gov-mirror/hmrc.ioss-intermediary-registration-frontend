@@ -58,8 +58,8 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
       getData
   }
 
-  def authAndGetDataAndCheckVerifyEmail(): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
-    authAndGetData() andThen
+  def authAndGetDataAndCheckVerifyEmail(inAmend: Boolean): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
+    authAndGetData(inAmend) andThen
       checkEmailVerificationStatus()
   }
 
