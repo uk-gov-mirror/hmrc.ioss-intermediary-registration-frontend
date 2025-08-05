@@ -27,6 +27,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.tradingNames.AllTradingNamesQuery
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import utils.FutureSyntax.FutureOps
 import views.html.tradingNames.TradingNameView
 
@@ -42,7 +43,8 @@ class TradingNameController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = (cc.authAndGetData() andThen cc.limitIndex(index, maxTradingNames)) {
+  def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] =
+    (cc.authAndGetData(waypoints.inAmend) andThen cc.limitIndex(index, maxTradingNames)) {
     implicit request =>
 
       val form: Form[String] = formProvider(index, request.userAnswers.get(AllTradingNamesQuery).getOrElse(Seq.empty).map(_.name))
@@ -55,7 +57,8 @@ class TradingNameController @Inject()(
       Ok(view(preparedForm, waypoints, index))
   }
 
-  def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] = (cc.authAndGetData() andThen cc.limitIndex(index, maxTradingNames)).async {
+  def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] =
+    (cc.authAndGetData(waypoints.inAmend) andThen cc.limitIndex(index, maxTradingNames)).async {
     implicit request =>
 
       val form: Form[String] = formProvider(index, request.userAnswers.get(AllTradingNamesQuery).getOrElse(Seq.empty).map(_.name))
