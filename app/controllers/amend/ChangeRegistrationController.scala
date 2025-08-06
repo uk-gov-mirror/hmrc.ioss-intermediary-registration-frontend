@@ -48,7 +48,7 @@ class ChangeRegistrationController @Inject()(
         val thisPage = ChangeRegistrationPage
 
         val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangeRegistrationPage.urlFragment))
-        
+
         val vatRegistrationDetailsList = SummaryListViewModel(
           rows = Seq(
             VatRegistrationDetailsSummary.rowBusinessAddress(request.userAnswers)

@@ -40,10 +40,11 @@ import scala.concurrent.Future
 class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with EitherValues {
 
   class Harness(
+                 inAmend: Boolean,
                  frontendAppConfig: FrontendAppConfig,
                  emailVerificationService: EmailVerificationService,
                )
-    extends CheckEmailVerificationFilterImpl(frontendAppConfig, emailVerificationService) {
+    extends CheckEmailVerificationFilterImpl(inAmend, frontendAppConfig, emailVerificationService) {
     def callFilter(request: AuthenticatedDataRequest[_]): Future[Option[Result]] = filter(request)
   }
 
@@ -66,6 +67,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
+            inAmend = false,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
           )
@@ -91,6 +93,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
+            inAmend = false,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService
           )
@@ -118,6 +121,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
+            inAmend = false,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService
           )
@@ -145,6 +149,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
+            inAmend = false,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService
           )
@@ -170,6 +175,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
+            inAmend = false,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService
           )
