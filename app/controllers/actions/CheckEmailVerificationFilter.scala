@@ -43,7 +43,6 @@ class CheckEmailVerificationFilterImpl(
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    // TODO -> Remove inAmend check as part of ContactDetails Amend Section
     if (frontendAppConfig.emailVerificationEnabled && !inAmend) {
       request.userAnswers.get(ContactDetailsPage) match {
         case Some(contactDetails) =>
