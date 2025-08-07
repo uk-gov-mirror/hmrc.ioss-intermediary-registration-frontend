@@ -28,6 +28,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.euDetails.DeriveNumberOfEuRegistrations
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import utils.CheckWaypoints.CheckWaypointsOps
 import utils.CompletionChecks
 import utils.EuDetailsCompletionChecks.*
@@ -52,7 +53,7 @@ class AddEuDetailsController @Inject()(
   private val euCountriesSize: Int = Country.euCountries.size
   private val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
 
       getDerivedItems(waypoints, DeriveNumberOfEuRegistrations) { numberOfEuRegistrations =>
@@ -70,7 +71,7 @@ class AddEuDetailsController @Inject()(
       }
   }
 
-  def onSubmit(waypoints: Waypoints, incompletePromptShown: Boolean): Action[AnyContent] = cc.authAndGetData().async {
+  def onSubmit(waypoints: Waypoints, incompletePromptShown: Boolean): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
 
       withCompleteDataAsync[EuDetails](

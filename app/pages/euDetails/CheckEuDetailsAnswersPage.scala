@@ -18,7 +18,7 @@ package pages.euDetails
 
 import controllers.euDetails.routes
 import models.{Index, UserAnswers}
-import pages.{CheckAnswersPage, Page, Waypoint, Waypoints}
+import pages.{CheckAnswersPage, NonEmptyWaypoints, Page, Waypoint, Waypoints}
 import play.api.mvc.Call
 
 final case class CheckEuDetailsAnswersPage(countryIndex: Index) extends CheckAnswersPage {
@@ -35,6 +35,10 @@ final case class CheckEuDetailsAnswersPage(countryIndex: Index) extends CheckAns
   }
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
+    AddEuDetailsPage(Some(countryIndex))
+  }
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
     AddEuDetailsPage(Some(countryIndex))
   }
 }

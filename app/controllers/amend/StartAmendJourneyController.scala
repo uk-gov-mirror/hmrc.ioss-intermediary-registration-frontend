@@ -17,23 +17,65 @@
 package controllers.amend
 
 import controllers.actions.*
-import pages.Waypoints
+import models.domain.VatCustomerInfo
+import models.{BankDetails, Bic, ContactDetails, DesAddress, Iban, Index, TradingName, UserAnswers}
+import pages.{BankDetailsPage, ContactDetailsPage, Waypoints}
 import pages.amend.ChangeRegistrationPage
+import pages.euDetails.HasFixedEstablishmentPage
+import pages.filters.RegisteredForIossIntermediaryInEuPage
+import pages.previousIntermediaryRegistrations.HasPreviouslyRegisteredAsIntermediaryPage
+import pages.tradingNames.{HasTradingNamePage, TradingNamePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.FutureSyntax.FutureOps
 
+import java.time.{Instant, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class StartAmendJourneyController @Inject()(
                                              override val messagesApi: MessagesApi,
                                              cc: AuthenticatedControllerComponents,
-                                             val controllerComponents: MessagesControllerComponents,
+                                             val controllerComponents: MessagesControllerComponents
                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(inAmend = true).async {
-    Redirect(ChangeRegistrationPage.route(waypoints).url).toFuture
+
+    implicit request =>
+      val iban: Iban = Iban("GB33BUKB202015555555555").toOption.get
+      val bic: Bic = Bic("BARCGB22456").get
+
+      val vatCustomerInfo: VatCustomerInfo =
+        VatCustomerInfo(
+          registrationDate = LocalDate.now(),
+          desAddress = DesAddress(
+            line1 = "1818 East Tusculum Street",
+            line2 = Some("Phil Tow"),
+            line3 = None, line4 = None, line5 = None,
+            postCode = Some("BT4 2XW"),
+            countryCode = "EL"),
+          organisationName = Some("Company name"),
+          individualName = None,
+          singleMarketIndicator = true,
+          deregistrationDecisionDate = None
+        )
+
+      def basicUserAnswersWithVatInfo: UserAnswers =
+        UserAnswers(id = request.userId, vatInfo = Some(vatCustomerInfo), lastUpdated = Instant.now())
+
+      def completeUserAnswersWithVatInfo: UserAnswers = {
+        basicUserAnswersWithVatInfo
+          .set(RegisteredForIossIntermediaryInEuPage, false).get
+          .set(HasTradingNamePage, true).get
+          .set(TradingNamePage(Index(0)), TradingName("Chartoff Winkler and Co. Robert Rocky Balboa Robert Balboa")).get
+          .set(HasPreviouslyRegisteredAsIntermediaryPage, false).get
+          .set(HasFixedEstablishmentPage, false).get
+          .set(ContactDetailsPage, ContactDetails("Rocky Balboa", "028 123 4567", "rocky.balboa@chartoffwinkler.co.uk")).get
+          .set(BankDetailsPage, BankDetails("Chartoff Winkler and Co.", Some(bic), iban)).get
+      }
+
+      for {
+        _           <- cc.sessionRepository.set(completeUserAnswersWithVatInfo)
+      } yield Redirect(ChangeRegistrationPage.route(waypoints).url)
   }
 }

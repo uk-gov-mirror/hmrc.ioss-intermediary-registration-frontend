@@ -542,7 +542,7 @@ trait ModelGenerators extends EtmpModelGenerators {
         chars <- listOfN(length, Gen.numChar)
       } yield chars.mkString).suchThat(_.trim.nonEmpty)
   }
-  
+
   implicit lazy val arbitraryNonCompliantDetails: Arbitrary[NonCompliantDetails] = {
     Arbitrary {
       for {
