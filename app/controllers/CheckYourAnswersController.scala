@@ -53,7 +53,7 @@ class CheckYourAnswersController @Inject()(
 
   private val thisPage = CheckYourAnswersPage
 
-  def onPageLoad(): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail() {
+  def onPageLoad(): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail(inAmend = false) {
     implicit request =>
 
       request.userAnswers.vatInfo match {

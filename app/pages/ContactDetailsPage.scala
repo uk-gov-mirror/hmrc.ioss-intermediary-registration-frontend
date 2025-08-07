@@ -20,6 +20,8 @@ import models.{ContactDetails, UserAnswers}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import controllers.routes
+import pages.amend.ChangeRegistrationPage
+import utils.AmendWaypoints.AmendWaypointsOps
 
 case object ContactDetailsPage extends QuestionPage[ContactDetails] {
 
@@ -33,5 +35,13 @@ case object ContactDetailsPage extends QuestionPage[ContactDetails] {
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     BankDetailsPage
+  }
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
+    answers.get(this) match {
+      case Some(_) if waypoints.inAmend => ChangeRegistrationPage
+      case Some(_) => CheckYourAnswersPage
+      case _ => JourneyRecoveryPage
+    }
   }
 }

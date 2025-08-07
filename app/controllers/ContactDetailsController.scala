@@ -22,15 +22,17 @@ import forms.ContactDetailsFormProvider
 import models.ContactDetails
 import models.emailVerification.PasscodeAttemptsStatus.*
 import models.requests.AuthenticatedDataRequest
+import pages.amend.ChangeRegistrationPage
 
 import javax.inject.Inject
-import pages.{BankDetailsPage, ContactDetailsPage, Waypoints}
+import pages.{BankDetailsPage, CheckYourAnswersPage, ContactDetailsPage, Waypoints}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services.EmailVerificationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ContactDetailsView
+import utils.AmendWaypoints.AmendWaypointsOps
 import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,7 +50,7 @@ class ContactDetailsController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] =
-    cc.authAndGetData() {
+    cc.authAndGetData(waypoints.inAmend) {
       implicit request =>
 
         val ossRegistration = request.latestOssRegistration
@@ -64,20 +66,27 @@ class ContactDetailsController @Inject()(
     }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] =  {
-    cc.authAndGetData().async {
+    cc.authAndGetData(waypoints.inAmend).async {
       implicit request =>
 
         val ossRegistration = request.latestOssRegistration
         val iossRegistration = request.latestIossRegistration
         val numberOfIossRegistrations = request.numberOfIossRegistrations
         val messages = messagesApi.preferred(request)
+        val bankDetailsCompleted = request.userAnswers.get(BankDetailsPage).isDefined
 
         form.bindFromRequest().fold(
           formWithErrors =>
             BadRequest(view(formWithErrors, waypoints, ossRegistration, numberOfIossRegistrations, iossRegistration)).toFuture,
 
           value => {
-            val continueUrl = s"${config.loginContinueUrl}${BankDetailsPage.route(waypoints).url}"
+            val continueUrl = if (waypoints.inAmend) {
+              s"${config.loginContinueUrl}${ChangeRegistrationPage.route(waypoints).url}"
+            } else if (bankDetailsCompleted) {
+              s"${config.loginContinueUrl}${CheckYourAnswersPage.route(waypoints).url}"
+            } else {
+              s"${config.loginContinueUrl}${BankDetailsPage.route(waypoints).url}"
+            }
 
             if (config.emailVerificationEnabled) {
               verifyEmailAndRedirect(waypoints, messages, continueUrl, value)

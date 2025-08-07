@@ -34,6 +34,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckEmailVerificationFilterImpl(
+                                        inAmend: Boolean,
                                         frontendAppConfig: FrontendAppConfig,
                                         emailVerificationService: EmailVerificationService
                                       )(implicit val executionContext: ExecutionContext) extends ActionFilter[AuthenticatedDataRequest] with Logging {
@@ -41,8 +42,8 @@ class CheckEmailVerificationFilterImpl(
   override protected def filter[A](request: AuthenticatedDataRequest[A]): Future[Option[Result]] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-    
-    if (frontendAppConfig.emailVerificationEnabled) {
+
+    if (frontendAppConfig.emailVerificationEnabled && !inAmend) {
       request.userAnswers.get(ContactDetailsPage) match {
         case Some(contactDetails) =>
           emailVerificationService.isEmailVerified(contactDetails.emailAddress, request.userId).map {
@@ -75,7 +76,7 @@ class CheckEmailVerificationFilterProvider @Inject()(
                                                       emailVerificationService: EmailVerificationService
                                                     )(implicit executionContext: ExecutionContext) {
 
-  def apply(): CheckEmailVerificationFilterImpl = {
-    new CheckEmailVerificationFilterImpl(frontendAppConfig, emailVerificationService)
+  def apply(inAmend: Boolean): CheckEmailVerificationFilterImpl = {
+    new CheckEmailVerificationFilterImpl(inAmend, frontendAppConfig, emailVerificationService)
   }
 }
