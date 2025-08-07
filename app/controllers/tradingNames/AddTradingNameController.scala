@@ -26,6 +26,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.tradingNames.DeriveNumberOfTradingNames
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import utils.FutureSyntax.FutureOps
 import utils.ItemsHelper.getDerivedItems
 import viewmodels.checkAnswers.tradingNames.TradingNameSummary
@@ -44,7 +45,7 @@ class AddTradingNameController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
       getDerivedItems(waypoints, DeriveNumberOfTradingNames) {
         number =>
@@ -59,7 +60,7 @@ class AddTradingNameController @Inject()(
       }
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
 
       getDerivedItems(waypoints, DeriveNumberOfTradingNames) {
