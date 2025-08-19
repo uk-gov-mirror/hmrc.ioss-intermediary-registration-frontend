@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(
-        layout: templates.Layout,
-        govukButton: GovukButton
-)
+package pages
 
-@()(implicit request: Request[_], messages: Messages)
+import controllers.routes
+import play.api.mvc.Call
 
-@layout(pageTitle = titleNoForm(messages("emailVerificationCodesExceededController.title"))) {
+object NoRegistrationInProgressPage extends Page {
 
-    <h1 class="govuk-heading-xl">@messages("emailVerificationCodesExceededController.heading")</h1>
-
-    <p class="govuk-body">@messages("emailVerificationCodesExceeded.p1")</p>
-
-    <p class="govuk-body">@messages("emailVerificationCodesExceeded.p2")</p>
-
-    <p class="govuk-body">@Html(messages("emailVerificationCodesExceeded.returnContactDetails"))</p>
+  override def route(waypoints: Waypoints): Call = {
+    routes.NoRegistrationInProgressController.onPageLoad()
+  }
 }

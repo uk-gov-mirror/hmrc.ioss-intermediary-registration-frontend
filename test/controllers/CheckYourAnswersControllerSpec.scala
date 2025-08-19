@@ -38,18 +38,18 @@ import play.api.test.Helpers.*
 import queries.etmp.EtmpEnrolmentResponseQuery
 import queries.euDetails.EuDetailsQuery
 import repositories.AuthenticatedUserAnswersRepository
-import services.RegistrationService
+import services.{RegistrationService, SaveForLaterService}
 import testutils.CheckYourAnswersSummaries.{getCYANonNiVatDetailsSummaryList, getCYASummaryList, getCYAVatDetailsSummaryList}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import utils.FutureSyntax.FutureOps
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
 
-import scala.concurrent.Future
-
 class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency with BeforeAndAfterEach {
 
   private val mockRegistrationService: RegistrationService = mock[RegistrationService]
+  private val mockSaveForLaterService: SaveForLaterService = mock[SaveForLaterService]
+
   private val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
   private val country = arbitraryCountry.arbitrary.sample.value
 
@@ -64,6 +64,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
   override def beforeEach(): Unit = {
     reset(mockRegistrationService)
+    reset(mockSaveForLaterService)
   }
 
   "Check Your Answers Controller" - {
@@ -134,7 +135,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
             )
 
             status(result) `mustBe` OK
-            contentAsString(result) `mustBe` view(waypoints, vatDetailsList, list, isValid = true)(request, messages(application)).toString
+            contentAsString(result) `mustBe` view(waypoints, vatDetailsList, list, isValid = false)(request, messages(application)).toString
           }
         }
 
@@ -167,6 +168,23 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
             contentAsString(result) `mustBe` view(waypoints, vatDetailsList, list, isValid = false)(request, messages(application)).toString
           }
         }
+
+        "must throw an exception when VAT information missing" in {
+
+          val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+          running(application) {
+
+            val request = FakeRequest(GET, routeCheckYourAnswersControllerGET)
+
+            val result = route(application, request).value
+
+            whenReady(result.failed) { exp =>
+              exp `mustBe` a[IllegalStateException]
+              exp.getMessage `mustBe` "VAT information missing"
+            }
+          }
+        }
       }
 
       "must redirect to Journey Recovery for a GET if no existing data is found" in {
@@ -192,7 +210,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
         val etmpEnrolmentResponse: EtmpEnrolmentResponse = EtmpEnrolmentResponse(iossReference = "123456789")
 
-        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+        when(mockSessionRepository.set(any())) thenReturn true.toFuture
         when(mockRegistrationService.createRegistration(any(), any())(any())) thenReturn Right(etmpEnrolmentResponse).toFuture
 
         val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
@@ -219,8 +237,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
         when(mockRegistrationService.createRegistration(any(), any())(any())) thenReturn Left(ServerError).toFuture
           Redirect(ErrorSubmittingRegistrationPage.route(waypoints).url).toFuture
 
+        when(mockSaveForLaterService.saveUserAnswers(any(), any(), any())(any(), any(), any())) thenReturn Redirect(ErrorSubmittingRegistrationPage.route(waypoints).url).toFuture
+
         val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
           .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+          .overrides(bind[SaveForLaterService].toInstance(mockSaveForLaterService))
           .build()
 
         running(application) {
@@ -230,11 +251,14 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
           status(result) `mustBe` SEE_OTHER
           redirectLocation(result).value `mustBe` ErrorSubmittingRegistrationPage.route(waypoints).url
+          verify(mockSaveForLaterService, times(1)).saveUserAnswers(any(), any(), any())(any(), any(), any())
         }
       }
 
       "when the user has not answered all necessary data" - {
+
         "the user is redirected when the incomplete prompt is shown" - {
+
           "to Tax Registered In EU when it has a 'yes' answer but all countries were removed" in {
             val answers = completeUserAnswersWithVatInfo
               .set(HasFixedEstablishmentPage, true).success.value
@@ -244,7 +268,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
             val application = applicationBuilder(userAnswers = Some(answers)).build()
 
             running(application) {
-              val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = true).url)
+              val request = FakeRequest(POST, routeCheckYourAnswersControllerPOST(incompletePrompt = true))
               val result = route(application, request).value
 
               status(result) `mustBe` SEE_OTHER

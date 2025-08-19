@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-package controllers.amend
+package controllers
 
 import base.SpecBase
-import config.FrontendAppConfig
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import views.html.amend.AmendCompleteView
+import views.html.NoRegistrationInProgressView
 
-class AmendCompleteControllerSpec extends SpecBase {
+class NoRegistrationInProgressControllerSpec extends SpecBase {
 
-  "AmendComplete Controller" - {
+  "NoRegistrationInProgress Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
-        .build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, controllers.amend.routes.AmendCompleteController.onPageLoad().url)
-        val config = application.injector.instanceOf[FrontendAppConfig]
-        val result = route(application, request).value
-        val view = application.injector.instanceOf[AmendCompleteView]
+        val request = FakeRequest(GET, routes.NoRegistrationInProgressController.onPageLoad().url)
 
-        status(result) mustBe OK
-        contentAsString(result) mustBe view(config.feedbackUrl(request))(request, messages(application)).toString
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[NoRegistrationInProgressView]
+
+        status(result) `mustBe` OK
+        contentAsString(result) `mustBe` view(waypoints)(request, messages(application)).toString
       }
     }
   }

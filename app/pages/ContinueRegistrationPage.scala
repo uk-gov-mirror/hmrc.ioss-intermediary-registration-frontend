@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(
-        layout: templates.Layout,
-        govukButton: GovukButton
-)
+package pages
 
-@()(implicit request: Request[_], messages: Messages)
+import models.ContinueRegistration
+import play.api.libs.json.JsPath
+import play.api.mvc.Call
+import controllers.routes
 
-@layout(pageTitle = titleNoForm(messages("emailVerificationCodesExceededController.title"))) {
+case object ContinueRegistrationPage extends QuestionPage[ContinueRegistration] {
 
-    <h1 class="govuk-heading-xl">@messages("emailVerificationCodesExceededController.heading")</h1>
+  override def path: JsPath = JsPath \ toString
 
-    <p class="govuk-body">@messages("emailVerificationCodesExceeded.p1")</p>
+  override def toString: String = "continueRegistration"
 
-    <p class="govuk-body">@messages("emailVerificationCodesExceeded.p2")</p>
-
-    <p class="govuk-body">@Html(messages("emailVerificationCodesExceeded.returnContactDetails"))</p>
+  override def route(waypoints: Waypoints): Call = {
+    routes.ContinueRegistrationController.onPageLoad(waypoints)
+  }
 }

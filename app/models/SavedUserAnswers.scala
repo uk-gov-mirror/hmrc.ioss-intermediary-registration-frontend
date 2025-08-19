@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +12,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(
-        layout: templates.Layout,
-        govukButton: GovukButton
-)
+package models
 
-@()(implicit request: Request[_], messages: Messages)
+import models.domain.VatCustomerInfo
+import play.api.libs.json.{JsObject, Json, OFormat}
+import uk.gov.hmrc.domain.Vrn
 
-@layout(pageTitle = titleNoForm(messages("emailVerificationCodesExceededController.title"))) {
+import java.time.Instant
 
-    <h1 class="govuk-heading-xl">@messages("emailVerificationCodesExceededController.heading")</h1>
+case class SavedUserAnswers(
+                             vrn: Vrn,
+                             data: JsObject,
+                             vatInfo: Option[VatCustomerInfo],
+                             lastUpdated: Instant
+                           )
 
-    <p class="govuk-body">@messages("emailVerificationCodesExceeded.p1")</p>
-
-    <p class="govuk-body">@messages("emailVerificationCodesExceeded.p2")</p>
-
-    <p class="govuk-body">@Html(messages("emailVerificationCodesExceeded.returnContactDetails"))</p>
+object SavedUserAnswers {
+  
+  implicit val format: OFormat[SavedUserAnswers] = Json.format[SavedUserAnswers]
 }
