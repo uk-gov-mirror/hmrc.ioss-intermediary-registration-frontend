@@ -21,7 +21,6 @@ import models.SessionData
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.*
 import play.api.libs.json.Format
-import uk.gov.hmrc.mdc.Mdc
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
@@ -60,7 +59,7 @@ class SessionRepository @Inject()(
 
   private def byUserId(userId: String): Bson = Filters.equal("userId", userId)
 
-  def keepAlive(userId: String): Future[Boolean] = Mdc.preservingMdc {
+  def keepAlive(userId: String): Future[Boolean] = {
     collection
       .updateOne(
         filter = byUserId(userId),
@@ -70,7 +69,7 @@ class SessionRepository @Inject()(
       .map(_ => true)
   }
 
-  def get(userId: String): Future[Seq[SessionData]] = Mdc.preservingMdc {
+  def get(userId: String): Future[Seq[SessionData]] = {
     keepAlive(userId).flatMap {
       _ =>
         collection
@@ -78,7 +77,7 @@ class SessionRepository @Inject()(
     }
   }
 
-  def set(sessionData: SessionData): Future[Boolean] = Mdc.preservingMdc {
+  def set(sessionData: SessionData): Future[Boolean] = {
 
     val updatedSessionData = sessionData copy (lastUpdated = Instant.now(clock))
 
@@ -92,7 +91,7 @@ class SessionRepository @Inject()(
       .map(_ => true)
   }
 
-  def clear(userId: String): Future[Boolean] = Mdc.preservingMdc {
+  def clear(userId: String): Future[Boolean] = {
     collection
       .deleteOne(byUserId(userId))
       .toFuture()
