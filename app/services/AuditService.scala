@@ -45,4 +45,3 @@ class AuditService @Inject()(
       detail      = auditModel.detail
     )
 }
-
