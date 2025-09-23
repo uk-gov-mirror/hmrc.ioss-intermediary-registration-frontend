@@ -23,6 +23,7 @@ import models.domain.ModelHelpers.normaliseSpaces
 import models.domain.VatCustomerInfo
 import models.enrolments.{EACDEnrolment, EACDEnrolments, EACDIdentifiers}
 import models.etmp.*
+import models.etmp.amend.EtmpAmendRegistrationChangeLog
 import models.etmp.display.{EtmpDisplayEuRegistrationDetails, EtmpDisplayRegistration, EtmpDisplaySchemeDetails, RegistrationWrapper}
 import models.euDetails.{EuDetails, RegistrationType}
 import models.iossRegistration.*
@@ -631,8 +632,8 @@ trait ModelGenerators extends EtmpModelGenerators {
   implicit lazy val arbitraryEtmpAdminUse: Arbitrary[EtmpAdminUse] = {
     Arbitrary {
       for {
-        changeDate <- Gen.option(arbitrary[LocalDateTime])
-      } yield EtmpAdminUse(changeDate = changeDate)
+        changeDate <- arbitrary[LocalDateTime]
+      } yield EtmpAdminUse(changeDate = Some(changeDate))
     }
   }
 
@@ -858,7 +859,7 @@ trait ModelGenerators extends EtmpModelGenerators {
       }
     }
   }
-  
+
   implicit lazy val arbitraryEtmpSchemeDetails: Arbitrary[EtmpSchemeDetails] = {
     Arbitrary {
       for {
@@ -885,7 +886,7 @@ trait ModelGenerators extends EtmpModelGenerators {
       }
     }
   }
-  
+
   implicit lazy val arbitraryEtmpRegistrationRequest: Arbitrary[EtmpRegistrationRequest] = {
     Arbitrary {
       for {
@@ -908,5 +909,21 @@ trait ModelGenerators extends EtmpModelGenerators {
         )
       }
     }
+  }
+
+  implicit lazy val arbitraryEtmpAmendRegistrationChangeLog: Arbitrary[EtmpAmendRegistrationChangeLog] =
+    Arbitrary {
+      for {
+        tradingNames <- arbitrary[Boolean]
+        fixedEstablishments <- arbitrary[Boolean]
+        contactDetails <- arbitrary[Boolean]
+        bankDetails <- arbitrary[Boolean]
+        reRegistration <- arbitrary[Boolean]
+        otherAddress <- arbitrary[Boolean]
+      } yield EtmpAmendRegistrationChangeLog(tradingNames, fixedEstablishments, contactDetails, bankDetails, reRegistration, otherAddress)
+    }
+
+  implicit lazy val arbitraryEuTaxReference: Gen[String] = {
+    Gen.listOfN(maxEuTaxReferenceLength, Gen.alphaNumChar).map(_.mkString)
   }
 }
