@@ -48,7 +48,7 @@ object VatRegistrationDetailsSummary {
     }
   }
 
-  def rowVatNumber(answers: UserAnswers)(implicit messages: Messages, request: AuthenticatedDataRequest[AnyContent]): Option[SummaryListRow] = {
+  def rowVatNumber()(implicit messages: Messages, request: AuthenticatedDataRequest[AnyContent]): Option[SummaryListRow] = {
     Some(createNameSummaryListRow(request.vrn.vrn, "vatRegistrationNumber"))
   }
 

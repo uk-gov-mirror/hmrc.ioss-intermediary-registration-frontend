@@ -178,7 +178,7 @@ class CheckYourAnswersController @Inject()(
     val rows = Seq(
       VatRegistrationDetailsSummary.rowBasedInUk(request.userAnswers),
       VatRegistrationDetailsSummary.rowBusinessName(request.userAnswers),
-      VatRegistrationDetailsSummary.rowVatNumber(request.userAnswers)
+      VatRegistrationDetailsSummary.rowVatNumber()
     ).flatten
 
     if (!isNiBasedIntermediary(vatCustomerInfo)) {

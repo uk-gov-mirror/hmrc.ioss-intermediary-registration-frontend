@@ -36,7 +36,7 @@ object CheckYourAnswersSummaries extends SummaryListFluency {
     Seq(
       VatRegistrationDetailsSummary.rowBasedInUk(answers),
       VatRegistrationDetailsSummary.rowBusinessName(answers),
-      VatRegistrationDetailsSummary.rowVatNumber(answers),
+      VatRegistrationDetailsSummary.rowVatNumber(),
       VatRegistrationDetailsSummary.rowBusinessAddress(answers)
     ).flatten
   }
@@ -47,7 +47,7 @@ object CheckYourAnswersSummaries extends SummaryListFluency {
     Seq(
       VatRegistrationDetailsSummary.rowBasedInUk(answers),
       VatRegistrationDetailsSummary.rowBusinessName(answers),
-      VatRegistrationDetailsSummary.rowVatNumber(answers)
+      VatRegistrationDetailsSummary.rowVatNumber()
     ).flatten
   }
 

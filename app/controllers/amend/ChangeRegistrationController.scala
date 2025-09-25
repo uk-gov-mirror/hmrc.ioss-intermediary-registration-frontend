@@ -16,14 +16,17 @@
 
 package controllers.amend
 
+import config.Constants.niPostCodeAreaPrefix
 import controllers.actions.*
 import logging.Logging
+import models.requests.AuthenticatedDataRequest
 import models.CheckMode
 import pages.amend.ChangeRegistrationPage
 import pages.{EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.RegistrationService
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, HasFixedEstablishmentSummary}
@@ -52,11 +55,10 @@ class ChangeRegistrationController @Inject()(
 
         val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
-        val vatRegistrationDetailsList = SummaryListViewModel(
-          rows = Seq(
-            VatRegistrationDetailsSummary.rowBusinessAddress(request.userAnswers)
-          ).flatten
-        )
+        val vatRegistrationDetailsList: SummaryList =
+          SummaryListViewModel(
+            rows = determineVatRegistrationDetailsList()(request.request)
+          )
 
         val niAddressSummaryRow = NiAddressSummary.row(waypoints, request.userAnswers, thisPage)
         val maybeHasTradingNameSummaryRow = HasTradingNameSummary.row(waypoints, request.userAnswers, thisPage)
@@ -130,6 +132,22 @@ class ChangeRegistrationController @Inject()(
           logger.error(exception.getMessage, exception)
           throw exception
       }
+  }
+
+  private def determineVatRegistrationDetailsList()(implicit request: AuthenticatedDataRequest[AnyContent]): Seq[SummaryListRow] = {
+
+    val rows = Seq(
+      VatRegistrationDetailsSummary.rowBasedInUk(request.userAnswers),
+      VatRegistrationDetailsSummary.rowBusinessName(request.userAnswers),
+      VatRegistrationDetailsSummary.rowVatNumber()
+    ).flatten
+
+    val isNiBasedIntermediary = request.userAnswers.vatInfo.get.desAddress.postCode.exists(_.toUpperCase.startsWith(niPostCodeAreaPrefix))
+    if (!isNiBasedIntermediary) {
+      rows
+    } else {
+      rows ++ VatRegistrationDetailsSummary.rowBusinessAddress(request.userAnswers)
+    }
   }
 }
 
