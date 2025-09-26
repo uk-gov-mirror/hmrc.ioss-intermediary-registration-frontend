@@ -18,10 +18,12 @@ package pages.checkVatDetails
 
 import controllers.checkVatDetails.routes
 import models.{UkAddress, UserAnswers}
-import pages.{Page, QuestionPage, Waypoints}
+import pages.amend.ChangeRegistrationPage
+import pages.{JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import pages.tradingNames.HasTradingNamePage
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
+import utils.AmendWaypoints.AmendWaypointsOps
 
 case object NiAddressPage extends QuestionPage[UkAddress] {
 
@@ -35,5 +37,13 @@ case object NiAddressPage extends QuestionPage[UkAddress] {
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     HasTradingNamePage
+  }
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
+    answers.get(this) match {
+      case Some(_) if waypoints.inAmend => ChangeRegistrationPage
+      case Some(_) => HasTradingNamePage
+      case _ => JourneyRecoveryPage
+    }
   }
 }
