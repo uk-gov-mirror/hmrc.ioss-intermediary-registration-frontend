@@ -61,7 +61,7 @@ object CheckYourAnswersSummaries extends SummaryListFluency {
     val hasPreviouslyRegisteredAsIntermediarySummaryRow: Option[SummaryListRow] =
       HasPreviouslyRegisteredAsIntermediarySummary.checkAnswersRow(waypoints, answers, sourcePage)
     val previousIntermediaryRegistrationSummaryRow: Option[SummaryListRow] =
-      PreviousIntermediaryRegistrationsSummary.checkAnswersRow(waypoints, answers, sourcePage)
+      PreviousIntermediaryRegistrationsSummary.checkAnswersRow(waypoints, answers, sourcePage, Seq.empty)
     val hasFixedEstablishmentSummaryRow = HasFixedEstablishmentSummary.row(waypoints, answers, sourcePage)
     val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(waypoints, answers, sourcePage)
     val contactDetailsContactNameSummaryRow = ContactDetailsSummary.rowContactName(waypoints, answers, sourcePage)

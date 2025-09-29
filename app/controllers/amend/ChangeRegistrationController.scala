@@ -21,6 +21,8 @@ import controllers.actions.*
 import logging.Logging
 import models.requests.AuthenticatedDataRequest
 import models.CheckMode
+import models.{CheckMode, Country}
+import models.previousIntermediaryRegistrations.PreviousIntermediaryRegistrationDetails
 import pages.amend.ChangeRegistrationPage
 import pages.{EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -60,12 +62,21 @@ class ChangeRegistrationController @Inject()(
             rows = determineVatRegistrationDetailsList()(request.request)
           )
 
+        val existingPreviousRegistrations: Seq[PreviousIntermediaryRegistrationDetails] =
+          request.registrationWrapper.etmpDisplayRegistration.intermediaryDetails.map(_.otherIossIntermediaryRegistrations.map { etmp =>
+            PreviousIntermediaryRegistrationDetails(
+              previousEuCountry = Country.fromCountryCodeUnsafe(etmp.issuedBy),
+              previousIntermediaryNumber = etmp.intermediaryNumber,
+              nonCompliantDetails = None
+            )
+          }).getOrElse(Seq.empty)
+
         val niAddressSummaryRow = NiAddressSummary.row(waypoints, request.userAnswers, thisPage)
         val maybeHasTradingNameSummaryRow = HasTradingNameSummary.row(waypoints, request.userAnswers, thisPage)
         val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(waypoints, request.userAnswers, thisPage)
         val maybeHasPreviouslyRegisteredAsIntermediaryRow = HasPreviouslyRegisteredAsIntermediarySummary
           .checkAnswersRow(waypoints, request.userAnswers, thisPage)
-        val previouslyRegisteredAsIntermediaryRow = PreviousIntermediaryRegistrationsSummary.checkAnswersRow(waypoints, request.userAnswers, thisPage)
+        val previouslyRegisteredAsIntermediaryRow = PreviousIntermediaryRegistrationsSummary.checkAnswersRow(waypoints, request.userAnswers, thisPage, existingPreviousRegistrations)
         val maybeHasFixedEstablishmentSummaryRow = HasFixedEstablishmentSummary.row(waypoints,request.userAnswers, thisPage)
         val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(waypoints, request.userAnswers, thisPage)
         val contactDetailsFullNameRow = ContactDetailsSummary.rowContactName(waypoints, request.userAnswers, thisPage)

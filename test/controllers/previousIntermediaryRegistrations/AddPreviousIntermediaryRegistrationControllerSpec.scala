@@ -80,7 +80,7 @@ class AddPreviousIntermediaryRegistrationControllerSpec extends SpecBase with Mo
         val view = application.injector.instanceOf[AddPreviousIntermediaryRegistrationView]
 
         val previousIntermediaryRegistrationSummaryList: SummaryList = PreviousIntermediaryRegistrationsSummary
-          .row(waypoints, updatedAnswers, AddPreviousIntermediaryRegistrationPage())
+          .row(waypoints, updatedAnswers, AddPreviousIntermediaryRegistrationPage(), Seq.empty)
 
         status(result) `mustBe` OK
         contentAsString(result) `mustBe` view(form, waypoints, previousIntermediaryRegistrationSummaryList, canAddCountries = true)(request, messages(application)).toString
@@ -108,7 +108,7 @@ class AddPreviousIntermediaryRegistrationControllerSpec extends SpecBase with Mo
         val view = application.injector.instanceOf[AddPreviousIntermediaryRegistrationView]
 
         val previousIntermediaryRegistrationSummaryList: SummaryList = PreviousIntermediaryRegistrationsSummary
-          .row(waypoints, userAnswers, AddPreviousIntermediaryRegistrationPage())
+          .row(waypoints, userAnswers, AddPreviousIntermediaryRegistrationPage(), Seq.empty)
 
         status(result) `mustBe` OK
         contentAsString(result) `mustBe` view(form, waypoints, previousIntermediaryRegistrationSummaryList, canAddCountries = false)(request, messages(application)).toString
@@ -136,7 +136,7 @@ class AddPreviousIntermediaryRegistrationControllerSpec extends SpecBase with Mo
         val view = application.injector.instanceOf[AddPreviousIntermediaryRegistrationView]
 
         val previousIntermediaryRegistrationSummaryList: SummaryList = PreviousIntermediaryRegistrationsSummary
-          .row(waypoints, userAnswers, AddPreviousIntermediaryRegistrationPage())
+          .row(waypoints, userAnswers, AddPreviousIntermediaryRegistrationPage(), Seq.empty)
 
         status(result) `mustBe` OK
         contentAsString(result) `mustBe` view(form, waypoints, previousIntermediaryRegistrationSummaryList, canAddCountries = true)(request, messages(application)).toString
@@ -275,7 +275,7 @@ class AddPreviousIntermediaryRegistrationControllerSpec extends SpecBase with Mo
         val result = route(application, request).value
 
         val previousIntermediaryRegistrationSummaryList: SummaryList = PreviousIntermediaryRegistrationsSummary
-          .row(waypoints, updatedAnswers, AddPreviousIntermediaryRegistrationPage())
+          .row(waypoints, updatedAnswers, AddPreviousIntermediaryRegistrationPage(), Seq.empty)
 
         status(result) `mustBe` BAD_REQUEST
         contentAsString(result) `mustBe` view(boundForm, waypoints, previousIntermediaryRegistrationSummaryList, canAddCountries = true)(request, messages(application)).toString
