@@ -169,7 +169,7 @@ class PreviouslyRegisteredAsAnIntermediaryJourneySpec extends AnyFreeSpec with J
             goToChangeAnswer(PreviousIntermediaryRegistrationNumberPage(countryIndex(0))),
             pageMustBe(PreviousIntermediaryRegistrationNumberPage(countryIndex(0))),
             submitAnswer(PreviousIntermediaryRegistrationNumberPage(countryIndex(0)), updatedIntermediaryNumber),
-            pageMustBe(AddPreviousIntermediaryRegistrationPage(Some(countryIndex(1)))),
+            pageMustBe(AddPreviousIntermediaryRegistrationPage(Some(countryIndex(0)))),
             answerMustEqual(PreviousIntermediaryRegistrationNumberPage(countryIndex(0)), updatedIntermediaryNumber)
           )
       }
