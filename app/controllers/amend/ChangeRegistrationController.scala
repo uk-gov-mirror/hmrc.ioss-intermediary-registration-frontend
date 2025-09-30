@@ -20,7 +20,6 @@ import config.Constants.niPostCodeAreaPrefix
 import controllers.actions.*
 import logging.Logging
 import models.requests.AuthenticatedDataRequest
-import models.CheckMode
 import models.{CheckMode, Country}
 import models.previousIntermediaryRegistrations.PreviousIntermediaryRegistrationDetails
 import pages.amend.ChangeRegistrationPage
