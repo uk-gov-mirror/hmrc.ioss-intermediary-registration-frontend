@@ -23,6 +23,7 @@ import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
+import utils.AmendWaypoints.AmendWaypointsOps
 
 object HasPreviouslyRegisteredAsIntermediarySummary {
 
@@ -35,7 +36,7 @@ object HasPreviouslyRegisteredAsIntermediarySummary {
     answers.get(HasPreviouslyRegisteredAsIntermediaryPage).map { answer =>
 
       val value = if (answer) "site.yes" else "site.no"
-      val actions = if (answer) {
+      val actions = if (answer && waypoints.inAmend) {
         Seq.empty
       } else {
         Seq(
