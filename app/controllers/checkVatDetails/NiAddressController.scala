@@ -26,6 +26,7 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import utils.FutureSyntax.FutureOps
 import views.html.checkVatDetails.NiAddressView
 
@@ -41,7 +42,7 @@ class NiAddressController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData() {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend) {
     implicit request =>
 
       val form: Form[UkAddress] = formProvider()
@@ -53,7 +54,7 @@ class NiAddressController @Inject()(
       Ok(view(preparedForm, waypoints))
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
 
       val form: Form[UkAddress] = formProvider()

@@ -18,6 +18,7 @@ package controllers.amend
 
 import base.SpecBase
 import models.domain.VatCustomerInfo
+import models.requests.AuthenticatedDataRequest
 import models.{BankDetails, Bic, CheckMode, ContactDetails, DesAddress, Iban, Index, TradingName, UserAnswers}
 import pages.{BankDetailsPage, ContactDetailsPage, EmptyWaypoints, Waypoint, Waypoints}
 import pages.amend.ChangeRegistrationPage
@@ -26,6 +27,7 @@ import pages.filters.RegisteredForIossIntermediaryInEuPage
 import pages.previousIntermediaryRegistrations.HasPreviouslyRegisteredAsIntermediaryPage
 import pages.tradingNames.{HasTradingNamePage, TradingNamePage}
 import play.api.i18n.Messages
+import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -100,7 +102,16 @@ class ChangeRegistrationControllerSpec extends SpecBase with SummaryListFluency 
   }
 
   private def getChangeRegistrationVatRegistrationDetailsSummaryList(answers: UserAnswers)(implicit msgs: Messages): Seq[SummaryListRow] = {
+
+    implicit val authRequest: AuthenticatedDataRequest[AnyContent] =
+      AuthenticatedDataRequest(
+        fakeRequest, testCredentials, vrn, testEnrolments, answers, None, 0, None, None, None, None
+      )
+
     Seq(
+      VatRegistrationDetailsSummary.rowBasedInUk(answers),
+      VatRegistrationDetailsSummary.rowBusinessName(answers),
+      VatRegistrationDetailsSummary.rowVatNumber(),
       VatRegistrationDetailsSummary.rowBusinessAddress(answers)
     ).flatten
   }
