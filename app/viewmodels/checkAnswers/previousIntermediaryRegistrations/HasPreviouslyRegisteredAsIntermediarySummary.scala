@@ -35,15 +35,20 @@ object HasPreviouslyRegisteredAsIntermediarySummary {
     answers.get(HasPreviouslyRegisteredAsIntermediaryPage).map { answer =>
 
       val value = if (answer) "site.yes" else "site.no"
-
-      SummaryListRowViewModel(
-        key = "hasPreviouslyRegisteredAsIntermediary.checkYourAnswersLabel",
-        value = ValueViewModel(value),
-        actions = Seq(
+      val actions = if (answer) {
+        Seq.empty
+      } else {
+        Seq(
           ActionItemViewModel("site.change", HasPreviouslyRegisteredAsIntermediaryPage.changeLink(waypoints, sourcePage).url)
             .withVisuallyHiddenText(messages("hasPreviouslyRegisteredAsIntermediary.change.hidden")
             )
         )
+      }
+
+      SummaryListRowViewModel(
+        key = "hasPreviouslyRegisteredAsIntermediary.checkYourAnswersLabel",
+        value = ValueViewModel(value),
+        actions = actions
       )
     }
   }
