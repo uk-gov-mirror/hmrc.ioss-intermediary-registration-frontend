@@ -17,6 +17,7 @@
 package models.previousIntermediaryRegistrations
 
 import models.Country
+import models.etmp.EtmpOtherIossIntermediaryRegistrations
 import play.api.libs.json.{Json, OFormat}
 
 case class PreviousIntermediaryRegistrationDetails(
@@ -26,6 +27,32 @@ case class PreviousIntermediaryRegistrationDetails(
                                                   )
 
 object PreviousIntermediaryRegistrationDetails {
+
+  def fromOtherIossIntermediaryRegistrations(
+                                              etmpRegistrations: Seq[EtmpOtherIossIntermediaryRegistrations]
+                                            ): Seq[PreviousIntermediaryRegistrationDetails] = {
+    etmpRegistrations.map { etmp =>
+      PreviousIntermediaryRegistrationDetails(
+        previousEuCountry = Country.fromCountryCodeUnsafe(etmp.issuedBy),
+        previousIntermediaryNumber = etmp.intermediaryNumber,
+        nonCompliantDetails = None
+      )
+    }
+  }
+
+  def fromOtherIossIntermediaryRegistrationsByCountry(
+                                                       country: Country,
+                                                       etmpPreviousRegistrationDetails: Seq[EtmpOtherIossIntermediaryRegistrations]
+                                                     ): Seq[PreviousIntermediaryRegistrationDetails] = {
+    etmpPreviousRegistrationDetails.collect {
+      case registrationDetails if registrationDetails.issuedBy == country.code =>
+        PreviousIntermediaryRegistrationDetails(
+          previousEuCountry = country,
+          previousIntermediaryNumber = registrationDetails.intermediaryNumber,
+          nonCompliantDetails = None
+        )
+    }
+  }
 
   implicit val format: OFormat[PreviousIntermediaryRegistrationDetails] = Json.format[PreviousIntermediaryRegistrationDetails]
 }

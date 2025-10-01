@@ -15,6 +15,7 @@ site.submit = Register
 site.confirm = Confirm
 site.warning = Warning
 site.processing = We are processing your registration.
+site.add = Add
 
 date.day = Day
 date.month = Month
@@ -268,6 +269,7 @@ deletePreviousIntermediaryRegistration.error.required = Select yes if you want t
 
 previousIntermediaryRegistrations.checkYourAnswers = Countries registered in
 previousIntermediaryRegistrations.change.hidden = previous Intermediary Registrations
+previousIntermediaryRegistrations.add.hidden = previous Intermediary Registrations
 remove.previousIntermediaryRegistration.hidden = previous intermediary registration for {0}
 change.previousIntermediaryRegistration.hidden = previous intermediary registration for {0}
 

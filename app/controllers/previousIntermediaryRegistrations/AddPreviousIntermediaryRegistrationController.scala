@@ -19,7 +19,8 @@ package controllers.previousIntermediaryRegistrations
 import controllers.actions.*
 import forms.previousIntermediaryRegistrations.AddPreviousIntermediaryRegistrationFormProvider
 import models.Country
-import models.previousIntermediaryRegistrations.PreviousIntermediaryRegistrationDetailsWithOptionalIntermediaryNumber
+import models.previousIntermediaryRegistrations.{PreviousIntermediaryRegistrationDetails, PreviousIntermediaryRegistrationDetailsWithOptionalIntermediaryNumber}
+import models.requests.AuthenticatedDataRequest
 import pages.previousIntermediaryRegistrations.AddPreviousIntermediaryRegistrationPage
 import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
@@ -55,12 +56,14 @@ class AddPreviousIntermediaryRegistrationController @Inject()(
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
 
+      val previousRegistration = getPreviousRegistrationsWhenInAmend(waypoints, request)
+
       getDerivedItems(waypoints, DeriveNumberOfPreviousIntermediaryRegistrations) { numberOfPreviousIntermediaryRegistrations =>
 
         val canAddCountries: Boolean = numberOfPreviousIntermediaryRegistrations < Country.euCountries.size
 
         val previousIntermediaryRegistrationSummary: SummaryList = PreviousIntermediaryRegistrationsSummary
-          .row(waypoints, request.userAnswers, AddPreviousIntermediaryRegistrationPage())
+          .row(waypoints, request.userAnswers, AddPreviousIntermediaryRegistrationPage(), previousRegistration)
 
         withCompleteDataAsync[PreviousIntermediaryRegistrationDetailsWithOptionalIntermediaryNumber](
           data = getAllIncompletePreviousIntermediaryRegistrations _,
@@ -70,6 +73,19 @@ class AddPreviousIntermediaryRegistrationController @Inject()(
           Ok(view(form, waypoints, previousIntermediaryRegistrationSummary, canAddCountries)).toFuture
         }
       }
+  }
+
+  private def getPreviousRegistrationsWhenInAmend(
+                                                   waypoints: Waypoints,
+                                                   request: AuthenticatedDataRequest[AnyContent]
+                                                 ): Seq[PreviousIntermediaryRegistrationDetails] = {
+    if (waypoints.inAmend) {
+      request.registrationWrapper.flatMap(_.etmpDisplayRegistration.intermediaryDetails.map(_.otherIossIntermediaryRegistrations))
+        .map(PreviousIntermediaryRegistrationDetails.fromOtherIossIntermediaryRegistrations)
+        .getOrElse(Seq.empty)
+    } else {
+      Seq.empty
+    }
   }
 
   def onSubmit(waypoints: Waypoints, incompletePromptShown: Boolean): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
@@ -92,7 +108,7 @@ class AddPreviousIntermediaryRegistrationController @Inject()(
           val canAddCountries: Boolean = numberOfPreviousIntermediaryRegistrations < Country.euCountries.size
 
           val previousIntermediaryRegistrationSummary: SummaryList = PreviousIntermediaryRegistrationsSummary
-            .row(waypoints, request.userAnswers, AddPreviousIntermediaryRegistrationPage())
+            .row(waypoints, request.userAnswers, AddPreviousIntermediaryRegistrationPage(), Seq.empty)
 
           form.bindFromRequest().fold(
             formWithErrors =>

@@ -46,8 +46,17 @@ class DeleteAllPreviousIntermediaryRegistrationsController @Inject()(
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend) {
     implicit request =>
+      protectAgainstAmendMode(waypoints) {
+        Ok(view(form, waypoints))
+      }
+  }
 
-      Ok(view(form, waypoints))
+  private def protectAgainstAmendMode[A](waypoints: Waypoints)(action: => A): A = {
+    if (waypoints.inAmend) {
+      throw new InvalidAmendModeOperationException("Cannot do this action while in amend mode")
+    } else {
+      action
+    }
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
@@ -70,3 +79,5 @@ class DeleteAllPreviousIntermediaryRegistrationsController @Inject()(
       )
   }
 }
+
+class InvalidAmendModeOperationException(message: String) extends RuntimeException(message)

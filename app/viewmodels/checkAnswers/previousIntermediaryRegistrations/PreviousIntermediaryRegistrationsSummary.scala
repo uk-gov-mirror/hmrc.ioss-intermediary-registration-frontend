@@ -16,6 +16,7 @@
 
 package viewmodels.checkAnswers.previousIntermediaryRegistrations
 
+import models.previousIntermediaryRegistrations.PreviousIntermediaryRegistrationDetails
 import models.{Index, UserAnswers}
 import pages.previousIntermediaryRegistrations.{AddPreviousIntermediaryRegistrationPage, DeletePreviousIntermediaryRegistrationPage, PreviousIntermediaryRegistrationNumberPage}
 import pages.{AddItemPage, CheckAnswersPage, Waypoints}
@@ -29,16 +30,23 @@ import viewmodels.implicits.*
 
 object PreviousIntermediaryRegistrationsSummary {
 
-  def row(waypoints: Waypoints, answers: UserAnswers, sourcePage: AddItemPage)(implicit messages: Messages): SummaryList = {
+  def row(
+           waypoints: Waypoints,
+           answers: UserAnswers,
+           sourcePage: AddItemPage,
+           existingPreviousRegistrations: Seq[PreviousIntermediaryRegistrationDetails]
+         )(implicit messages: Messages): SummaryList = {
 
+    val existingCountries = existingPreviousRegistrations.map(_.previousEuCountry)
+    
     SummaryList(
       answers.get(AllPreviousIntermediaryRegistrationsWithOptionalIntermediaryNumberQuery).getOrElse(List.empty).zipWithIndex.map {
         case (previousIntermediaryRegistrationDetails, countryIndex) =>
 
-          SummaryListRowViewModel(
-            key = previousIntermediaryRegistrationDetails.previousEuCountry.name,
-            value = ValueViewModel(HtmlContent(previousIntermediaryRegistrationDetails.previousIntermediaryNumber.getOrElse(""))),
-            actions = Seq(
+          val actions = if (existingCountries.contains(previousIntermediaryRegistrationDetails.previousEuCountry)) {
+            Seq.empty
+          } else {
+            Seq(
               ActionItemViewModel("site.change", PreviousIntermediaryRegistrationNumberPage(Index(countryIndex)).changeLink(waypoints, sourcePage).url)
                 .withVisuallyHiddenText(
                   messages("change.previousIntermediaryRegistration.hidden", previousIntermediaryRegistrationDetails.previousEuCountry.name)
@@ -48,7 +56,12 @@ object PreviousIntermediaryRegistrationsSummary {
                 .withVisuallyHiddenText(
                   messages("remove.previousIntermediaryRegistration.hidden", previousIntermediaryRegistrationDetails.previousEuCountry.name)
                 )
-            ),
+            )
+          }
+          SummaryListRowViewModel(
+            key = previousIntermediaryRegistrationDetails.previousEuCountry.name,
+            value = ValueViewModel(HtmlContent(previousIntermediaryRegistrationDetails.previousIntermediaryNumber.getOrElse(""))),
+            actions = actions,
             actionClasses = "govuk-!-width-one-third"
           )
       }
@@ -58,9 +71,14 @@ object PreviousIntermediaryRegistrationsSummary {
   def checkAnswersRow(
                        waypoints: Waypoints,
                        answers: UserAnswers,
-                       sourcePage: CheckAnswersPage
+                       sourcePage: CheckAnswersPage,
+                       existingPreviousRegistrations: Seq[PreviousIntermediaryRegistrationDetails]
                      )(implicit messages: Messages): Option[SummaryListRow] = {
     answers.get(AllPreviousIntermediaryRegistrationsQuery).map { previousIntermediaryRegistrations =>
+
+      val currentAnswerCountries = previousIntermediaryRegistrations.map(_.previousEuCountry)
+      val existingCountries = existingPreviousRegistrations.map(previousRegistration => previousRegistration.previousEuCountry)
+      val sameListOfCountries: Boolean = currentAnswerCountries.sortBy(_.code) == existingCountries.sortBy(_.code)
 
       val value = previousIntermediaryRegistrations.map { previousIntermediaryRegistrationDetails =>
         HtmlFormat.escape(previousIntermediaryRegistrationDetails.previousEuCountry.name)
@@ -70,8 +88,13 @@ object PreviousIntermediaryRegistrationsSummary {
         key = "previousIntermediaryRegistrations.checkYourAnswers",
         value = ValueViewModel(HtmlContent(value)),
         actions = Seq(
-          ActionItemViewModel("site.change", AddPreviousIntermediaryRegistrationPage().changeLink(waypoints, sourcePage).url)
-            .withVisuallyHiddenText(messages("previousIntermediaryRegistrations.change.hidden"))
+          if (sameListOfCountries) {
+            ActionItemViewModel("site.add", controllers.previousIntermediaryRegistrations.routes.AddPreviousIntermediaryRegistrationController.onPageLoad(waypoints).url)
+              .withVisuallyHiddenText(messages("previousIntermediaryRegistrations.add.hidden"))
+          } else {
+            ActionItemViewModel("site.change", AddPreviousIntermediaryRegistrationPage().changeLink(waypoints, sourcePage).url)
+              .withVisuallyHiddenText(messages("previousIntermediaryRegistrations.change.hidden"))
+          }
         )
       )
     }

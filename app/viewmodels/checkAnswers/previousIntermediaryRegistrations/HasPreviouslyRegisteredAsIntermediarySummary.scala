@@ -23,6 +23,7 @@ import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
+import utils.AmendWaypoints.AmendWaypointsOps
 
 object HasPreviouslyRegisteredAsIntermediarySummary {
 
@@ -35,15 +36,20 @@ object HasPreviouslyRegisteredAsIntermediarySummary {
     answers.get(HasPreviouslyRegisteredAsIntermediaryPage).map { answer =>
 
       val value = if (answer) "site.yes" else "site.no"
-
-      SummaryListRowViewModel(
-        key = "hasPreviouslyRegisteredAsIntermediary.checkYourAnswersLabel",
-        value = ValueViewModel(value),
-        actions = Seq(
+      val actions = if (answer && waypoints.inAmend) {
+        Seq.empty
+      } else {
+        Seq(
           ActionItemViewModel("site.change", HasPreviouslyRegisteredAsIntermediaryPage.changeLink(waypoints, sourcePage).url)
             .withVisuallyHiddenText(messages("hasPreviouslyRegisteredAsIntermediary.change.hidden")
             )
         )
+      }
+
+      SummaryListRowViewModel(
+        key = "hasPreviouslyRegisteredAsIntermediary.checkYourAnswersLabel",
+        value = ValueViewModel(value),
+        actions = actions
       )
     }
   }

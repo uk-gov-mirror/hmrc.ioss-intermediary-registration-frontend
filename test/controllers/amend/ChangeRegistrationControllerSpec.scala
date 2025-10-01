@@ -44,6 +44,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with SummaryListFluency 
 
   private val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
   private val amendYourAnswersPage = ChangeRegistrationPage
+  private val previousIntermediaryRegistration = arbitraryPreviousIntermediaryRegistrationDetails.arbitrary.sample.value
 
   override val iban: Iban = Iban("GB33BUKB202015555555555").toOption.get
   override val bic: Bic = Bic("BARCGB22456").get
@@ -122,7 +123,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with SummaryListFluency 
     val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(waypoints, answers, amendYourAnswersPage)
     val maybeHasPreviouslyRegisteredAsIntermediaryRow = HasPreviouslyRegisteredAsIntermediarySummary
       .checkAnswersRow(waypoints, answers, amendYourAnswersPage)
-    val previouslyRegisteredAsIntermediaryRow = PreviousIntermediaryRegistrationsSummary.checkAnswersRow(waypoints, answers, amendYourAnswersPage)
+    val previouslyRegisteredAsIntermediaryRow = PreviousIntermediaryRegistrationsSummary.checkAnswersRow(waypoints, answers, amendYourAnswersPage, Seq(previousIntermediaryRegistration))
     val maybeHasFixedEstablishmentSummaryRow = HasFixedEstablishmentSummary.row(waypoints, answers, amendYourAnswersPage)
     val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(waypoints, answers, amendYourAnswersPage)
     val contactDetailsFullNameRow = ContactDetailsSummary.rowContactName(waypoints, answers, amendYourAnswersPage)

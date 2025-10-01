@@ -18,7 +18,7 @@ package pages.previousIntermediaryRegistrations
 
 import controllers.previousIntermediaryRegistrations.routes
 import models.{Index, UserAnswers}
-import pages.{Page, QuestionPage, Waypoints}
+import pages.{NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
@@ -35,4 +35,9 @@ case class PreviousIntermediaryRegistrationNumberPage(countryIndex: Index) exten
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     AddPreviousIntermediaryRegistrationPage(Some(countryIndex))
   }
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
+    AddPreviousIntermediaryRegistrationPage(Some(countryIndex))
+  }
+
 }
