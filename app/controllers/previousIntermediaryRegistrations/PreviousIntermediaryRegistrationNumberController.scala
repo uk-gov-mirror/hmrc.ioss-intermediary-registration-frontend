@@ -83,12 +83,19 @@ class PreviousIntermediaryRegistrationNumberController @Inject()(
               traderID = previousSchemeNumber,
               countryCode = country.code
             ).flatMap {
-              case Some(activeMatch) if activeMatch.traderId.isAnIntermediary && activeMatch.matchType.isActiveTrader =>
+              case _ if waypoints.inAmend =>
+                saveAndRedirect(
+                  waypoints,
+                  countryIndex,
+                  previousSchemeNumber,
+                  None
+                )
+              case Some(activeMatch) if activeMatch.traderId.isAnIntermediary && activeMatch.isActiveTrader =>
                 Redirect(controllers.filters.routes.SchemeStillActiveController.onPageLoad(
                   activeMatch.memberState)
                 ).toFuture
 
-              case Some(activeMatch) if activeMatch.traderId.isAnIntermediary && activeMatch.matchType.isQuarantinedTrader =>
+              case Some(activeMatch) if activeMatch.traderId.isAnIntermediary && activeMatch.isQuarantinedTrader =>
                 Redirect(controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
                   activeMatch.memberState,
                   activeMatch.getEffectiveDate)
