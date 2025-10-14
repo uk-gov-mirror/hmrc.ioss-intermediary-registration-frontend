@@ -19,7 +19,7 @@ package controllers.amend
 import config.Constants.niPostCodeAreaPrefix
 import controllers.actions.*
 import logging.Logging
-import models.requests.AuthenticatedDataRequest
+import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIntermediaryRequest}
 import models.{CheckMode, Country}
 import models.previousIntermediaryRegistrations.PreviousIntermediaryRegistrationDetails
 import pages.amend.ChangeRegistrationPage
@@ -50,7 +50,9 @@ class ChangeRegistrationController @Inject()(
 
   def onPageLoad: Action[AnyContent] = cc.authAndRequireIntermediary(waypoints = EmptyWaypoints, inAmend = true).async {
 
-      implicit request =>
+      implicit request: AuthenticatedMandatoryIntermediaryRequest[AnyContent] =>
+        
+        val hasPreviousRegistrations: Boolean = request.hasMultipleIntermediaryEnrolments
 
         val thisPage = ChangeRegistrationPage
 
@@ -120,8 +122,8 @@ class ChangeRegistrationController @Inject()(
             bankDetailsIbanRow
           ).flatten
         )
-
-        Ok(view(waypoints, vatRegistrationDetailsList, list, request.intermediaryNumber)).toFuture
+// TODO: add isCurrentIossAccount with  msg
+        Ok(view(waypoints, vatRegistrationDetailsList, list, request.intermediaryNumber, hasPreviousRegistrations)).toFuture
   }
 
 

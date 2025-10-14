@@ -27,13 +27,19 @@
     button: CancelAmendRegistrationButton
 )
 
-@(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList, intermediaryNumber: String)(implicit request: Request[_], messages: Messages)
+@(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList, intermediaryNumber: String, hasPreviousRegistrations: Boolean)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("changeRegistration.title")), showBackLink = false) {
 
     <h1 class="govuk-heading-xl govuk-!-margin-0">@messages("changeRegistration.heading")</h1>
 
     <p class="govuk-caption-l govuk-!-margin-bottom-6">@messages("changeRegistration.intermediaryNumber", intermediaryNumber)</p>
+
+    @if(hasPreviousRegistrations) {
+        <p class="govuk-body govuk-!-margin-bottom-6">
+                <a class="govuk-link" id="change-previous-registrations" href="">@messages("changeRegistration.changePreviousRegistration")</a>
+        </p>
+    }
 
     <h2 class="govuk-heading-m">@messages("vatRegistrationDetails.checkYourAnswers.heading")</h2>
 
