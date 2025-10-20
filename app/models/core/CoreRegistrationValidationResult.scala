@@ -21,6 +21,7 @@ import play.api.i18n.Lang.logger.logger
 import play.api.libs.json.*
 
 import java.time.format.DateTimeFormatter
+import java.time.{Clock, LocalDate}
 
 
 case class CoreRegistrationValidationResult(
@@ -60,14 +61,23 @@ case class Match(
 
   def isActiveTrader: Boolean = {
     traderId.isAnIntermediary &&
-      matchType == MatchType.PreviousRegistrationFound &&
       exclusionStatusCode.isEmpty || exclusionStatusCode.contains(-1)
   }
 
-  def isQuarantinedTrader: Boolean = {
+  def isQuarantinedTrader(clock: Clock): Boolean = {
     traderId.isAnIntermediary &&
-      matchType == MatchType.PreviousRegistrationFound &&
-      exclusionStatusCode.contains(ExclusionReason.FailsToComply.numberValue)
+      exclusionStatusCode.contains(ExclusionReason.FailsToComply.numberValue) &&
+      isEffectiveDateLessThan2YearsAgo(clock)
+  }
+
+  private def isEffectiveDateLessThan2YearsAgo(clock: Clock): Boolean = {
+    exclusionEffectiveDate.map(LocalDate.parse) match {
+      case Some(effectiveDate) =>
+        val twoYearsAfterEffective = effectiveDate.plusYears(2)
+        val today = LocalDate.now(clock)
+        twoYearsAfterEffective.isAfter(today)
+      case _ => true
+    }
   }
 }
 
@@ -80,7 +90,8 @@ object Match {
 }
 
 case class TraderId(traderId: String) {
-  def isAnIntermediary: Boolean = traderId.toUpperCase.startsWith("IN")
+  private val traderIdScheme = TraderIdScheme(this)
+  def isAnIntermediary: Boolean = traderIdScheme == TraderIdScheme.ImportOneStopShopIntermediary
 }
 
 object TraderId {
@@ -94,4 +105,20 @@ object TraderId {
   }
 
   implicit val traderIdFormat: Format[TraderId] = Format(traderIdReads, traderIdWrites)
+}
+
+sealed trait TraderIdScheme
+
+object TraderIdScheme {
+  case object OneStopShop extends TraderIdScheme
+  case object ImportOneStopShopNetp extends TraderIdScheme
+  case object ImportOneStopShopIntermediary extends TraderIdScheme
+
+  def apply(traderId: TraderId): TraderIdScheme = {
+    traderId.traderId.toUpperCase match {
+      case id if id.startsWith("IN") => ImportOneStopShopIntermediary
+      case id if id.startsWith("IM") => ImportOneStopShopNetp
+      case _ => OneStopShop
+    }
+  }
 }

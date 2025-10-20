@@ -18,7 +18,6 @@ package models.core
 
 import base.SpecBase
 import models.core.MatchType.*
-import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.{JsError, Json, JsSuccess}
@@ -176,7 +175,18 @@ class CoreRegistrationValidationResultSpec extends AnyFreeSpec with Matchers wit
 
           for (nonActiveType <- nonActiveMatchTypes) {
 
-            val nonActiveMatch = activeMatch.copy(matchType = nonActiveType)
+            val nonActiveMatch = activeMatch.copy(matchType = nonActiveType, exclusionStatusCode = Some(1))
+
+            nonActiveMatch.isActiveTrader mustBe false
+          }
+        }
+
+        "for not active status codes" in {
+          val nonActiveStatusCodes = Seq(1, 2, 3, 4, 5, 6)
+
+          for (nonActiveStatusCode <- nonActiveStatusCodes) {
+
+            val nonActiveMatch = activeMatch.copy(exclusionStatusCode = Some(nonActiveStatusCode))
 
             nonActiveMatch.isActiveTrader mustBe false
           }
@@ -187,26 +197,42 @@ class CoreRegistrationValidationResultSpec extends AnyFreeSpec with Matchers wit
     "isQuarantinedTrader" - {
 
       "must return true for quarantined match types" in {
-        quarantinedMatch.isQuarantinedTrader mustBe true
+        quarantinedMatch.isQuarantinedTrader(stubClockAtArbitraryDate) mustBe true
         quarantinedMatch.isActiveTrader mustBe false
       }
 
-      "must return false for non intermediary quarantined match types" - {
-        val activeTypes = Seq(
-          TraderIdQuarantinedNETP,
-          OtherMSNETPQuarantinedNETP,
-          FixedEstablishmentQuarantinedNETP,
-          FixedEstablishmentActiveNETP,
-          TraderIdActiveNETP,
-          OtherMSNETPActiveNETP,
-          TransferringMSID
-        )
+      "must return false for a quarantined that's less than two years" in {
+        val twoYearsAgo = LocalDate.now(stubClockAtArbitraryDate).minusYears(2)
+        quarantinedMatch.copy(exclusionEffectiveDate = Some(twoYearsAgo.toString)).isQuarantinedTrader(stubClockAtArbitraryDate) mustBe false
+      }
 
-        for (activeType <- activeTypes) {
-          s"for ${activeType.getClass.getCanonicalName}" in {
-            quarantinedMatch.copy(matchType = activeType).isQuarantinedTrader mustBe false
+      "must return false for non intermediary quarantined status codes" - {
+        val statusCodes = Seq(-1, 1, 2, 3, 5, 6)
+
+        for (statusCode <- statusCodes) {
+          s"for status code $statusCode" in {
+            quarantinedMatch.copy(exclusionStatusCode = Some(statusCode)).isQuarantinedTrader(stubClockAtArbitraryDate) mustBe false
           }
         }
+      }
+    }
+  }
+
+  "TraderIdScheme" - {
+    "apply should" - {
+      "return ImportOneStopShopIntermediary with intermediary number" in {
+        val id = TraderId("IN9001234567")
+        TraderIdScheme(id) mustBe TraderIdScheme.ImportOneStopShopIntermediary
+      }
+
+      "return ImportOneStopShopNetp with NETP number" in {
+        val id = TraderId("IM9001234567")
+        TraderIdScheme(id) mustBe TraderIdScheme.ImportOneStopShopNetp
+      }
+
+      "return OneStopShop with other numbers" in {
+        val id = TraderId("123456789")
+        TraderIdScheme(id) mustBe TraderIdScheme.OneStopShop
       }
     }
   }

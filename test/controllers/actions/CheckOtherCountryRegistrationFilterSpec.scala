@@ -36,6 +36,7 @@ import services.core.CoreRegistrationValidationService
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.domain.Vrn
 
+import java.time.{Clock, LocalDate}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -63,7 +64,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
     reset(mockCoreRegistrationValidationService)
   }
 
-  class Harness(service: CoreRegistrationValidationService) extends CheckOtherCountryRegistrationFilterImpl(service) {
+  class Harness(service: CoreRegistrationValidationService, clock: Clock) extends CheckOtherCountryRegistrationFilterImpl(service, clock) {
     def callFilter(request: AuthenticatedDataRequest[_]): Future[Option[Result]] = filter(request)
   }
 
@@ -82,15 +83,19 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
           ).build()
 
         val testConditions = Table(
-          ("MatchType"),
-          (MatchType.PreviousRegistrationFound)
+          ("MatchType", "ReasonCode"),
+          (MatchType.PreviousRegistrationFound, None),
+          (MatchType.PreviousRegistrationFound, Some(-1)),
+          (MatchType.TraderIdActiveNETP, None),
+          (MatchType.TraderIdActiveNETP, Some(-1))
         )
 
-        forAll(testConditions) { (matchType) =>
+        forAll(testConditions) { (matchType, reasonCode) =>
           running(app) {
 
             val activeIntermediaryMatch = createMatchResponse(
-              matchType = matchType
+              matchType = matchType,
+              exclusionStatusCode = reasonCode
             )
 
             when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn
@@ -98,7 +103,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
             val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), emptyUserAnswers, None, 1, None, None, None, None)
 
-            val controller = new Harness(mockCoreRegistrationValidationService)
+            val controller = new Harness(mockCoreRegistrationValidationService, stubClockAtArbitraryDate)
 
             val result = controller.callFilter(request).futureValue
 
@@ -117,7 +122,8 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
         val testConditions = Table(
           ("MatchType"),
-          (MatchType.PreviousRegistrationFound)
+          (MatchType.PreviousRegistrationFound),
+          (MatchType.TraderIdQuarantinedNETP)
         )
 
         forAll(testConditions) { (matchType) =>
@@ -134,7 +140,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
             val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), emptyUserAnswers, None, 1, None, None, None, None)
 
-            val controller = new Harness(mockCoreRegistrationValidationService)
+            val controller = new Harness(mockCoreRegistrationValidationService, stubClockAtArbitraryDate)
 
             val result = controller.callFilter(request).futureValue
 
@@ -154,7 +160,9 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
         running(app) {
 
           val quarantinedIntermediaryMatch = createMatchResponse(
-            exclusionStatusCode = Some(4), exclusionEffectiveDate = Some("2022-10-10")
+            matchType = MatchType.PreviousRegistrationFound,
+            exclusionStatusCode = Some(4),
+            exclusionEffectiveDate = Some(LocalDate.now(stubClockAtArbitraryDate).minusYears(1).toString)
           )
 
           when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn
@@ -162,7 +170,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), emptyUserAnswers, None, 1, None, None, None, None)
 
-          val controller = new Harness(mockCoreRegistrationValidationService)
+          val controller = new Harness(mockCoreRegistrationValidationService, stubClockAtArbitraryDate)
 
           val result = controller.callFilter(request).futureValue
 
@@ -198,7 +206,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
             val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), emptyUserAnswers, None, 1, None, None, None, None)
 
-            val controller = new Harness(mockCoreRegistrationValidationService)
+            val controller = new Harness(mockCoreRegistrationValidationService, stubClockAtArbitraryDate)
 
             val result = controller.callFilter(request).failed
 
@@ -219,17 +227,19 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
           ).build()
 
         val testConditions = Table(
-          ("MatchType"),
-          (MatchType.TraderIdActiveNETP),
-          (MatchType.FixedEstablishmentActiveNETP),
-          (MatchType.OtherMSNETPActiveNETP)
+          ("Reason code"),
+          1,
+          2,
+          3,
+          5,
+          6
         )
 
-        forAll(testConditions) { (matchType) =>
+        forAll(testConditions) { (reasonCode) =>
           running(app) {
 
             val quarantinedIntermediaryMatch = createMatchResponse(
-              matchType = matchType
+              exclusionStatusCode = Some(reasonCode)
             )
 
             when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn
@@ -237,7 +247,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
             val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), emptyUserAnswers, None, 1, None, None, None, None)
 
-            val controller = new Harness(mockCoreRegistrationValidationService)
+            val controller = new Harness(mockCoreRegistrationValidationService, stubClockAtArbitraryDate)
 
             val result = controller.callFilter(request).futureValue
 
@@ -282,7 +292,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
             val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), emptyUserAnswers, None, 1, None, None, None, None)
 
-            val controller = new Harness(mockCoreRegistrationValidationService)
+            val controller = new Harness(mockCoreRegistrationValidationService, stubClockAtArbitraryDate)
 
             val result = controller.callFilter(request).futureValue
 
