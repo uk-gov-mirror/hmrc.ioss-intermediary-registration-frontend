@@ -19,7 +19,6 @@ package generators
 import config.Constants.fixedEstablishmentTradingNameMaxLength
 import models.*
 import models.checkVatDetails.CheckVatDetails
-import models.core.{Match, MatchType}
 import models.domain.ModelHelpers.normaliseSpaces
 import models.domain.VatCustomerInfo
 import models.enrolments.{EACDEnrolment, EACDEnrolments, EACDIdentifiers}
@@ -671,7 +670,7 @@ trait ModelGenerators extends EtmpModelGenerators {
   implicit lazy val arbitraryIntermediaryDetails: Arbitrary[EtmpIntermediaryDetails] = {
     Arbitrary {
       for {
-        otherIossIntermediaryRegistrations <- Gen.listOfN(2, arbitraryOtherIossIntermediaryRegistrations.arbitrary)
+        otherIossIntermediaryRegistrations <- Gen.listOfN(3, arbitraryOtherIossIntermediaryRegistrations.arbitrary)
       } yield {
         EtmpIntermediaryDetails(
           otherIossIntermediaryRegistrations = otherIossIntermediaryRegistrations
@@ -827,14 +826,6 @@ trait ModelGenerators extends EtmpModelGenerators {
     }
   }
 
-  implicit lazy val arbitraryEtmpWebsite: Arbitrary[EtmpWebsite] = {
-    Arbitrary {
-      for {
-        websiteAddress <- Gen.alphaStr
-      } yield EtmpWebsite(websiteAddress)
-    }
-  }
-
   implicit lazy val arbitraryEtmpEuRegistrationDetails: Arbitrary[EtmpEuRegistrationDetails] = {
     Arbitrary {
       for {
@@ -867,7 +858,6 @@ trait ModelGenerators extends EtmpModelGenerators {
         commencementDate <- arbitrary[LocalDate].map(_.toString)
         euRegistrationDetails <- Gen.listOfN(3, arbitraryEtmpEuRegistrationDetails.arbitrary)
         previousEURegistrationDetails <- Gen.listOfN(3, arbitraryEtmpPreviousEuRegistrationDetails.arbitrary)
-        websites <- Gen.listOfN(3, arbitraryEtmpWebsite.arbitrary)
         contactName <- Gen.alphaStr
         businessTelephoneNumber <- Gen.alphaNumStr
         businessEmailId <- Gen.alphaStr
@@ -877,7 +867,6 @@ trait ModelGenerators extends EtmpModelGenerators {
           commencementDate = commencementDate,
           euRegistrationDetails = euRegistrationDetails,
           previousEURegistrationDetails = previousEURegistrationDetails,
-          websites = Some(websites),
           contactName = contactName,
           businessTelephoneNumber = businessTelephoneNumber,
           businessEmailId = businessEmailId,
