@@ -18,7 +18,6 @@ package controllers.actions
 
 import logging.Logging
 import models.core.Match
-import models.ossExclusions.ExclusionReason
 import models.requests.AuthenticatedDataRequest
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
@@ -32,7 +31,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CheckOtherCountryRegistrationFilterImpl @Inject()(
                                                          service: CoreRegistrationValidationService,
-                                                         clock: Clock
+                                                         clock: Clock,
+                                                         inAmend: Boolean
                                                        )(implicit val executionContext: ExecutionContext)
   extends ActionFilter[AuthenticatedDataRequest] with Logging {
 
@@ -42,11 +42,11 @@ class CheckOtherCountryRegistrationFilterImpl @Inject()(
     
     service.searchUkVrn(request.vrn)(hc, request).map {
       case Some(activeMatch)
-        if activeMatch.isActiveTrader =>
+        if activeMatch.isActiveTrader && !inAmend =>
         Some(Redirect(controllers.filters.routes.SchemeStillActiveController.onPageLoad(activeMatch.memberState)))
 
       case Some(activeMatch)
-        if activeMatch.isQuarantinedTrader(clock) =>
+        if activeMatch.isQuarantinedTrader(clock) && !inAmend =>
         Some(Redirect(
           controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
             activeMatch.memberState,
@@ -64,7 +64,7 @@ class CheckOtherCountryRegistrationFilter @Inject()(
                                                      service: CoreRegistrationValidationService,
                                                      clock: Clock
                                                    )(implicit val executionContext: ExecutionContext) {
-  def apply(): CheckOtherCountryRegistrationFilterImpl = {
-    new CheckOtherCountryRegistrationFilterImpl(service, clock)
+  def apply(inAmend: Boolean): CheckOtherCountryRegistrationFilterImpl = {
+    new CheckOtherCountryRegistrationFilterImpl(service, clock, inAmend)
   }
 }

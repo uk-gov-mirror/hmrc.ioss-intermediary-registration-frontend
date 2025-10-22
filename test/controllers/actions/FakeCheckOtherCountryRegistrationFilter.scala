@@ -26,7 +26,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class FakeCheckOtherCountryRegistrationFilterImpl(clock: Clock) extends CheckOtherCountryRegistrationFilterImpl(
   mock[CoreRegistrationValidationService],
-  clock
+  clock,
+  inAmend = false
 )(ExecutionContext.Implicits.global) {
 
   override protected def filter[A](request: AuthenticatedDataRequest[A]): Future[Option[Result]] = {
@@ -39,6 +40,6 @@ class FakeCheckOtherCountryRegistrationFilter(clock: Clock) extends CheckOtherCo
   mock[CoreRegistrationValidationService],
   clock
 )(ExecutionContext.Implicits.global) {
-  override def apply(): CheckOtherCountryRegistrationFilterImpl =
+  override def apply(inAmend: Boolean): CheckOtherCountryRegistrationFilterImpl =
     new FakeCheckOtherCountryRegistrationFilterImpl(clock)
 }

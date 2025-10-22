@@ -152,7 +152,9 @@ class ChangeRegistrationController @Inject()(
       VatRegistrationDetailsSummary.rowVatNumber()
     ).flatten
 
-    val isNiBasedIntermediary = request.userAnswers.vatInfo.get.desAddress.postCode.exists(_.toUpperCase.startsWith(niPostCodeAreaPrefix))
+    val isNiBasedIntermediary = request.userAnswers.vatInfo
+      .flatMap(_.desAddress.postCode)
+      .exists(_.toUpperCase.startsWith(niPostCodeAreaPrefix))
     if (!isNiBasedIntermediary) {
       rows
     } else {
