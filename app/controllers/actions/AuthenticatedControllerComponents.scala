@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIntermediaryRequest, AuthenticatedOptionalDataRequest}
+import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIntermediaryRequest, AuthenticatedMandatoryIossRequest, AuthenticatedOptionalDataRequest}
 import pages.Waypoints
 import play.api.http.FileMimeTypes
 import play.api.i18n.{Langs, MessagesApi}
@@ -48,14 +48,7 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def requireIntermediary: IntermediaryRequiredAction
 
-  def authAndGetData(inAmend: Boolean = false): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
-    actionBuilder andThen
-      identify andThen
-      checkRegistration(inAmend) andThen
-      getData andThen
-      requireData(inAmend) andThen
-      checkOtherCountryRegistration()
-  }
+  def requireIoss: IossRequiredAction
 
   def authAndGetOptionalData(): ActionBuilder[AuthenticatedOptionalDataRequest, AnyContent] = {
     actionBuilder andThen
@@ -85,6 +78,23 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
     authAndGetDataAndCheckVerifyEmail(waypoints, inAmend) andThen
       requireIntermediary()
   }
+
+  def authAndRequireIoss(
+                          waypoints: Waypoints,
+                          inAmend: Boolean
+                        ): ActionBuilder[AuthenticatedMandatoryIossRequest, AnyContent] = {
+    authAndGetDataAndCheckVerifyEmail(waypoints, inAmend) andThen
+      requireIoss()
+  }
+
+  def authAndGetData(inAmend: Boolean = false): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
+    actionBuilder andThen
+      identify andThen
+      checkRegistration(inAmend) andThen
+      getData andThen
+      requireData(inAmend) andThen
+      checkOtherCountryRegistration()
+  }
 }
 
 case class DefaultAuthenticatedControllerComponents @Inject()(
@@ -104,5 +114,6 @@ case class DefaultAuthenticatedControllerComponents @Inject()(
                                                                checkEmailVerificationStatus: CheckEmailVerificationFilterProvider,
                                                                checkOtherCountryRegistration: CheckOtherCountryRegistrationFilter,
                                                                retrieveSaveForLaterUserAnswers: SaveForLaterRetrievalActionProvider,
-                                                               requireIntermediary: IntermediaryRequiredAction
+                                                               requireIntermediary: IntermediaryRequiredAction,
+                                                               requireIoss: IossRequiredAction
                                                              ) extends AuthenticatedControllerComponents
