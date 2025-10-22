@@ -52,7 +52,7 @@ class ContactDetailsController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] =
-    cc.authAndGetData(waypoints.inAmend) {
+    cc.authAndGetData(waypoints.inAmend, waypoints.inRejoin) {
       implicit request =>
 
         val ossRegistration = request.latestOssRegistration
@@ -68,7 +68,7 @@ class ContactDetailsController @Inject()(
     }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] =  {
-    cc.authAndGetData(waypoints.inAmend).async {
+    cc.authAndGetData(waypoints.inAmend, waypoints.inRejoin).async {
       implicit request =>
 
         val ossRegistration = request.latestOssRegistration

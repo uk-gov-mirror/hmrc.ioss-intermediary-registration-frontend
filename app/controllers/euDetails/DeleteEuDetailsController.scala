@@ -44,7 +44,7 @@ class DeleteEuDetailsController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend) {
+  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend, waypoints.inRejoin) {
     implicit request =>
 
       getAnswer(waypoints, EuDetailsQuery(countryIndex)) { euDetails =>
@@ -55,7 +55,7 @@ class DeleteEuDetailsController @Inject()(
       }
   }
 
-  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend, waypoints.inRejoin).async {
     implicit request =>
 
       getAnswerAsync(waypoints, EuDetailsQuery(countryIndex)) { euDetails =>

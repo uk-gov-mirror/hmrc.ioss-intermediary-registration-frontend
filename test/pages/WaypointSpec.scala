@@ -22,6 +22,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import pages.amend.ChangeRegistrationPage
 import pages.euDetails.{AddEuDetailsPage, CheckEuDetailsAnswersPage}
+import pages.rejoin.RejoinSchemePage
 
 class WaypointSpec extends AnyFreeSpec with Matchers with OptionValues {
 
@@ -45,6 +46,10 @@ class WaypointSpec extends AnyFreeSpec with Matchers with OptionValues {
 
     "must return Cancel Amend Registration when given its waypoint" in {
       Waypoint.fromString("change-your-registration").value mustBe ChangeRegistrationPage.waypoint
+    }
+
+    "must return rejoin Scheme when given its waypoint" in {
+      Waypoint.fromString("rejoin-check-your-details").value mustBe RejoinSchemePage.waypoint
     }
   }
 }

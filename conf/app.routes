@@ -206,4 +206,5 @@ GET        /no-registration-in-progress                                     cont
 
 GET        /cannot-use-not-registered                                       controllers.NotRegisteredController.onPageLoad()
 
-GET        /rejoinScheme                       controllers.RejoinSchemeController.onPageLoad()
+# Rejoin Scheme section
+GET        /rejoin-check-your-details                                       controllers.rejoin.RejoinSchemeController.onPageLoad()

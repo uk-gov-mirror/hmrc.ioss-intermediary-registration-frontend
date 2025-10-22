@@ -26,15 +26,15 @@ import utils.FutureSyntax.FutureOps
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CheckRegistrationFilterImpl(inAmend: Boolean, frontendAppConfig: FrontendAppConfig)(implicit val executionContext: ExecutionContext)
+class CheckRegistrationFilterImpl(inAmend: Boolean, inRejoin: Boolean, frontendAppConfig: FrontendAppConfig)(implicit val executionContext: ExecutionContext)
   extends ActionFilter[AuthenticatedIdentifierRequest] with Logging {
 
   override protected def filter[A](request: AuthenticatedIdentifierRequest[A]): Future[Option[Result]] = {
 
-    (hasIntermediaryEnrolment(request), inAmend) match
-      case (true, false) =>
+    (hasIntermediaryEnrolment(request), inAmend, inRejoin) match
+      case (true, false, false) =>
         Some(Redirect(controllers.routes.AlreadyRegisteredController.onPageLoad().url)).toFuture
-      case (false, true) =>
+      case (false, false, true) =>
         Some(Redirect(controllers.routes.NotRegisteredController.onPageLoad().url)).toFuture
       case _ => None.toFuture
 
@@ -49,7 +49,7 @@ class CheckRegistrationFilterProvider @Inject()(
                                                  frontendAppConfig: FrontendAppConfig
                                                )(implicit executionContext: ExecutionContext) {
 
-  def apply(inAmend: Boolean): CheckRegistrationFilterImpl = {
-    new CheckRegistrationFilterImpl(inAmend, frontendAppConfig)
+  def apply(inAmend: Boolean, inRejoin: Boolean): CheckRegistrationFilterImpl = {
+    new CheckRegistrationFilterImpl(inAmend, inRejoin, frontendAppConfig)
   }
 }

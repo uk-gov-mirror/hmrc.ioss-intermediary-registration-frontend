@@ -20,6 +20,7 @@ import models.{CheckMode, Mode, NormalMode}
 import pages.amend.ChangeRegistrationPage
 import pages.euDetails.{AddEuDetailsPage, CheckEuDetailsAnswersPage}
 import pages.previousIntermediaryRegistrations.AddPreviousIntermediaryRegistrationPage
+import pages.rejoin.RejoinSchemePage
 import pages.tradingNames.AddTradingNamePage
 
 case class Waypoint(
@@ -39,7 +40,8 @@ object Waypoint {
       AddEuDetailsPage().normalModeUrlFragment -> AddEuDetailsPage().waypoint(NormalMode),
       AddEuDetailsPage().checkModeUrlFragment -> AddEuDetailsPage().waypoint(CheckMode),
       CheckYourAnswersPage.urlFragment -> CheckYourAnswersPage.waypoint,
-      ChangeRegistrationPage.urlFragment -> ChangeRegistrationPage.waypoint
+      ChangeRegistrationPage.urlFragment -> ChangeRegistrationPage.waypoint,
+      RejoinSchemePage.urlFragment -> RejoinSchemePage.waypoint
     )
 
   def fromString(s: String): Option[Waypoint] =

@@ -21,6 +21,7 @@ import models.{Index, UserAnswers}
 import pages.amend.ChangeRegistrationPage
 import pages.{CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, RecoveryOps, Waypoints}
 import pages.euDetails.HasFixedEstablishmentPage
+import pages.rejoin.RejoinSchemePage
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.previousIntermediaryRegistrations.AllPreviousIntermediaryRegistrationsWithOptionalIntermediaryNumberQuery
@@ -53,6 +54,7 @@ case object HasPreviouslyRegisteredAsIntermediaryPage extends QuestionPage[Boole
         DeleteAllPreviousIntermediaryRegistrationsPage
 
       case (Some(false), _) if waypoints.inAmend => ChangeRegistrationPage
+      case (Some(false), _) if waypoints.inRejoin => RejoinSchemePage
       case (Some(false), _) => CheckYourAnswersPage
       case _ => JourneyRecoveryPage
     }
