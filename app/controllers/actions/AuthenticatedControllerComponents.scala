@@ -54,7 +54,7 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
       checkRegistration(inAmend) andThen
       getData andThen
       requireData(inAmend) andThen
-      checkOtherCountryRegistration()
+      checkOtherCountryRegistration(inAmend)
   }
 
   def authAndGetOptionalData(): ActionBuilder[AuthenticatedOptionalDataRequest, AnyContent] = {
@@ -75,7 +75,7 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
       identify andThen
       getData andThen
       requireData(inAmend) andThen
-      checkOtherCountryRegistration()
+      checkOtherCountryRegistration(inAmend)
   }
 
   def authAndRequireIntermediary(
