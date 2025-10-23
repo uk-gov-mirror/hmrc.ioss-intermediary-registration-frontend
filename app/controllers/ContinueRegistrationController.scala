@@ -20,7 +20,7 @@ import connectors.SaveForLaterConnector
 import controllers.actions.*
 import forms.ContinueRegistrationFormProvider
 import models.ContinueRegistration
-import pages.{IndexPage, JourneyRecoveryPage, SavedProgressPage, Waypoints}
+import pages.{IndexPage, JourneyRecoveryPage, SavedProgressContinuePage, SavedProgressPage, Waypoints}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
@@ -30,7 +30,7 @@ import utils.FutureSyntax.FutureOps
 import views.html.ContinueRegistrationView
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class ContinueRegistrationController @Inject()(
                                                 override val messagesApi: MessagesApi,
@@ -47,8 +47,13 @@ class ContinueRegistrationController @Inject()(
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData() {
     implicit request =>
 
+      val preparedForm = request.userAnswers.get(SavedProgressContinuePage) match {
+        case Some(value) => form.fill(value)
+        case _ => form
+      }
+
       request.userAnswers.get(SavedProgressPage).map { _ =>
-        Ok(view(form, waypoints))
+        Ok(view(preparedForm, waypoints))
       }.getOrElse {
         Redirect(controllers.routes.IndexController.onPageLoad())
       }
@@ -64,7 +69,10 @@ class ContinueRegistrationController @Inject()(
         value =>
           (value, request.userAnswers.get(SavedProgressPage)) match {
             case (ContinueRegistration.Continue, Some(url)) =>
-              Redirect(Call(GET, url)).toFuture
+              for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(SavedProgressContinuePage, value))
+                _ <- cc.sessionRepository.set(updatedAnswers)
+              } yield Redirect(Call(GET, url))
 
             case (ContinueRegistration.Delete, _) =>
               for {
