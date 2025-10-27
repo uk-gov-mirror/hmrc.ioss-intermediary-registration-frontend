@@ -16,21 +16,14 @@
 
 package controllers.rejoin
 
-import config.Constants.niPostCodeAreaPrefix
-import connectors.RegistrationConnector
 import controllers.actions.*
 import logging.Logging
-import models.{CheckMode, Country, UserAnswers}
-import models.etmp.display.RegistrationWrapper
-import models.requests.AuthenticatedDataRequest
+import models.{CheckMode, Country}
 import models.previousIntermediaryRegistrations.PreviousIntermediaryRegistrationDetails
 import pages.rejoin.RejoinSchemePage
 import pages.{EmptyWaypoints, Waypoint}
-
-import javax.inject.Inject
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.RegistrationService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, HasFixedEstablishmentSummary}
@@ -41,16 +34,14 @@ import viewmodels.govuk.summarylist.*
 import views.html.rejoin.RejoinSchemeView
 import utils.FutureSyntax.FutureOps
 
-import scala.concurrent.ExecutionContext
+import javax.inject.Inject
 
 class RejoinSchemeController @Inject()(
                                         override val messagesApi: MessagesApi,
                                         cc: AuthenticatedControllerComponents,
                                         val controllerComponents: MessagesControllerComponents,
-                                        registrationConnector: RegistrationConnector,
-                                        registrationService: RegistrationService,
                                         view: RejoinSchemeView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+                                      ) extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(): Action[AnyContent] = cc.authAndRequireIntermediary(waypoints = EmptyWaypoints, inAmend = true, inRejoin = true).async {
     implicit request =>
