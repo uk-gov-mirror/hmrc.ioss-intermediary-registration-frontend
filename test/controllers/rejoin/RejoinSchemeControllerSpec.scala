@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.rejoin
 
 import base.SpecBase
 import models.{CheckMode, UserAnswers}
-import pages.{EmptyWaypoints, Waypoint, Waypoints}
 import pages.rejoin.RejoinSchemePage
+import pages.{EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.Messages
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import testutils.CheckYourAnswersSummaries.FluentSummaryListRow
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import viewmodels.govuk.all.SummaryListViewModel
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, HasFixedEstablishmentSummary}
 import viewmodels.checkAnswers.previousIntermediaryRegistrations.{HasPreviouslyRegisteredAsIntermediarySummary, PreviousIntermediaryRegistrationsSummary}
 import viewmodels.checkAnswers.tradingNames.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, ContactDetailsSummary, NiAddressSummary, VatRegistrationDetailsSummary}
+import viewmodels.govuk.all.SummaryListViewModel
 import views.html.rejoin.RejoinSchemeView
-import testutils.CheckYourAnswersSummaries.FluentSummaryListRow
 
 class RejoinSchemeControllerSpec extends SpecBase {
 
