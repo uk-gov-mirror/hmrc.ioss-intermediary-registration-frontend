@@ -19,6 +19,7 @@ package controllers.rejoin
 import connectors.RegistrationConnector
 import controllers.actions.*
 import logging.Logging
+import pages.rejoin.RejoinSchemePage
 import play.api.mvc.{Action, MessagesControllerComponents}
 import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -47,7 +48,7 @@ class StartRejoinJourneyController @Inject()(
           val canRejoin = registrationWrapper.etmpDisplayRegistration.canRejoinScheme(currentDate)
 
           if(canRejoin) {
-            Redirect(controllers.rejoin.routes.RejoinSchemeController.onPageLoad().url).toFuture
+            Redirect(RejoinSchemePage.route(waypoints).url).toFuture
           } else {
             Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture
           }
