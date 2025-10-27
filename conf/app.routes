@@ -207,4 +207,6 @@ GET        /no-registration-in-progress                                     cont
 GET        /cannot-use-not-registered                                       controllers.NotRegisteredController.onPageLoad()
 
 # Rejoin Scheme section
+GET        /start-rejoin-journey                                            controllers.rejoin.StartRejoinJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
 GET        /rejoin-check-your-details                                       controllers.rejoin.RejoinSchemeController.onPageLoad()
