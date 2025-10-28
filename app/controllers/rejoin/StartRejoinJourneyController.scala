@@ -24,6 +24,8 @@ import play.api.mvc.{Action, MessagesControllerComponents}
 import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.AnyContent
+import repositories.AuthenticatedUserAnswersRepository
+import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 
@@ -36,6 +38,8 @@ class StartRejoinJourneyController @Inject()(
                                               cc: AuthenticatedControllerComponents,
                                               registrationConnector: RegistrationConnector,
                                               val controllerComponents: MessagesControllerComponents,
+                                              registrationService: RegistrationService,
+                                              authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository,
                                               clock: Clock
                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
@@ -48,7 +52,12 @@ class StartRejoinJourneyController @Inject()(
           val canRejoin = registrationWrapper.etmpDisplayRegistration.canRejoinScheme(currentDate)
 
           if(canRejoin) {
-            Redirect(RejoinSchemePage.route(waypoints).url).toFuture
+            for {
+              userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
+              _ <- authenticatedUserAnswersRepository.set(userAnswers)
+            } yield {
+              Redirect(RejoinSchemePage.route(waypoints).url)
+            }
           } else {
             Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture
           }
