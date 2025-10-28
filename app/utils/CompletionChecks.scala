@@ -16,6 +16,7 @@
 
 package utils
 
+import config.Constants.niPostCodeAreaPrefix
 import logging.Logging
 import models.Index
 import models.domain.VatCustomerInfo
@@ -106,7 +107,12 @@ trait CompletionChecks extends Logging {
                                           vatCustomerInfo: VatCustomerInfo
                                         )(implicit request: AuthenticatedDataRequest[AnyContent]): Boolean = {
     if (!isNiBasedIntermediary(vatCustomerInfo)) {
-      request.userAnswers.get(NiAddressPage).nonEmpty
+      request.userAnswers.get(NiAddressPage) match {
+        case Some(niAddress) =>
+          niAddress.postCode.trim.toUpperCase.startsWith(niPostCodeAreaPrefix)
+        case _ =>
+          false
+      }
     } else {
       true
     }

@@ -180,7 +180,7 @@ GET         /other-country-excluded-and-quarantined                         cont
 
 # Amend Registration
 GET         /change-your-registration                                       controllers.amend.ChangeRegistrationController.onPageLoad()
-POST        /change-your-registration                                       controllers.amend.ChangeRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /change-your-registration                                       controllers.amend.ChangeRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
 
 GET         /start-amend-journey                                            controllers.amend.StartAmendJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 

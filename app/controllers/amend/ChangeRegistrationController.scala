@@ -29,6 +29,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.RegistrationService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.CompletionChecks
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, HasFixedEstablishmentSummary}
 import viewmodels.checkAnswers.previousIntermediaryRegistrations.{HasPreviouslyRegisteredAsIntermediarySummary, PreviousIntermediaryRegistrationsSummary}
@@ -46,7 +47,7 @@ class ChangeRegistrationController @Inject()(
                                         registrationService: RegistrationService,
                                         val controllerComponents: MessagesControllerComponents,
                                         view: ChangeRegistrationView
-                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
   def onPageLoad: Action[AnyContent] = cc.authAndRequireIntermediary(waypoints = EmptyWaypoints, inAmend = true).async {
 
@@ -121,26 +122,43 @@ class ChangeRegistrationController @Inject()(
           ).flatten
         )
 
-        Ok(view(waypoints, vatRegistrationDetailsList, list, request.intermediaryNumber)).toFuture
+        request.userAnswers.vatInfo match {
+          case Some(vatInfo) =>
+            val isValid: Boolean = validate(vatInfo)(request.request)
+            Ok(view(waypoints, vatRegistrationDetailsList, list, request.intermediaryNumber, isValid)).toFuture
+          case None =>
+            logger.warn("Missing VAT information, redirecting to start of amend journey")
+            Redirect(routes.StartAmendJourneyController.onPageLoad()).toFuture
+        }
   }
 
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIntermediary(waypoints = EmptyWaypoints, inAmend = true).async {
+  def onSubmit(waypoints: Waypoints,  incompletePrompt: Boolean): Action[AnyContent] =
+    cc.authAndRequireIntermediary(waypoints = EmptyWaypoints, inAmend = true).async {
     implicit request =>
 
-      registrationService.amendRegistration(
-        answers = request.userAnswers,
-        registration = request.registrationWrapper.etmpDisplayRegistration,
-        vrn = request.vrn,
-        iossNumber = request.intermediaryNumber,
-        rejoin = false
-      ).map {
-        case Right(_) =>
-          Redirect(ChangeRegistrationPage.navigate(EmptyWaypoints, request.userAnswers, request.userAnswers).route)
-        case Left(error) =>
-          val exception = new Exception(error.body)
-          logger.error(exception.getMessage, exception)
-          throw exception
+      getFirstValidationErrorRedirect(waypoints, request.userAnswers.getVatInfoOrError)(request.request) match {
+        case Some(errorRedirect) => if (incompletePrompt) {
+          errorRedirect.toFuture
+        } else {
+          Redirect(routes.ChangeRegistrationController.onPageLoad()).toFuture
+        }
+
+        case None =>
+          registrationService.amendRegistration(
+            answers = request.userAnswers,
+            registration = request.registrationWrapper.etmpDisplayRegistration,
+            vrn = request.vrn,
+            iossNumber = request.intermediaryNumber,
+            rejoin = false
+          ).map {
+            case Right(_) =>
+              Redirect(ChangeRegistrationPage.navigate(EmptyWaypoints, request.userAnswers, request.userAnswers).route)
+            case Left(error) =>
+              val exception = new Exception(error.body)
+              logger.error(exception.getMessage, exception)
+              throw exception
+          }
       }
   }
 

@@ -79,25 +79,52 @@ class ChangeRegistrationControllerSpec extends SpecBase with SummaryListFluency 
 
   "ChangeRegistration Controller" - {
 
-    "must return OK and the correct view for a GET" in {
+    "must return OK and the correct view for a GET" - {
 
-      val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo)).build()
+      "with completed data present" in {
 
-      running(application) {
+        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo)).build()
 
-        val request = FakeRequest(GET, controllers.amend.routes.ChangeRegistrationController.onPageLoad().url)
-          .withSession("intermediaryNumber" -> "IN1234567890")
-        implicit val msgs: Messages = messages(application)
-        val result = route(application, request).value
+        running(application) {
 
-        val view = application.injector.instanceOf[ChangeRegistrationView]
+          val request = FakeRequest(GET, controllers.amend.routes.ChangeRegistrationController.onPageLoad().url)
+            .withSession("intermediaryNumber" -> "IN1234567890")
+          implicit val msgs: Messages = messages(application)
+          val result = route(application, request).value
 
-        val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(completeUserAnswersWithVatInfo))
+          val view = application.injector.instanceOf[ChangeRegistrationView]
 
-        val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(completeUserAnswersWithVatInfo))
+          val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(completeUserAnswersWithVatInfo))
 
-        status(result) mustBe OK
-        contentAsString(result) mustBe view(waypoints, vatInfoList, list, intermediaryNumber)(request, messages(application)).toString
+          val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(completeUserAnswersWithVatInfo))
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(waypoints, vatInfoList, list, intermediaryNumber, isValid = true)(request, messages(application)).toString
+        }
+      }
+
+      "with incomplete data" in {
+        val missingAnswers: UserAnswers = completeUserAnswersWithVatInfo
+          .remove(TradingNamePage(countryIndex(0))).success.value
+
+        val application = applicationBuilder(userAnswers = Some(missingAnswers)).build()
+
+        running(application) {
+
+          val request = FakeRequest(GET, controllers.amend.routes.ChangeRegistrationController.onPageLoad().url)
+            .withSession("intermediaryNumber" -> "IN1234567890")
+          implicit val msgs: Messages = messages(application)
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[ChangeRegistrationView]
+
+          val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(completeUserAnswersWithVatInfo))
+
+          val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(missingAnswers))
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(waypoints, vatInfoList, list, intermediaryNumber, isValid = false)(request, messages(application)).toString
+        }
       }
     }
   }

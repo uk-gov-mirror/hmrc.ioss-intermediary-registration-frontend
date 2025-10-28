@@ -22,10 +22,12 @@ import forms.previousIntermediaryRegistrations.DeletePreviousIntermediaryRegistr
 import models.Index
 import models.previousIntermediaryRegistrations.PreviousIntermediaryRegistrationDetailsWithOptionalIntermediaryNumber
 import models.requests.AuthenticatedDataRequest
+import pages.amend.ChangeRegistrationPage
 import pages.previousIntermediaryRegistrations.DeletePreviousIntermediaryRegistrationPage
 import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.Results.Redirect
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.previousIntermediaryRegistrations.{AllPreviousIntermediaryRegistrationsRawQuery, DeriveNumberOfPreviousIntermediaryRegistrations, PreviousIntermediaryRegistrationQuery, PreviousIntermediaryRegistrationWithOptionalIntermediaryNumberQuery}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -90,5 +92,11 @@ class DeletePreviousIntermediaryRegistrationController @Inject()(
     request.userAnswers.get(PreviousIntermediaryRegistrationWithOptionalIntermediaryNumberQuery(index)).map {
       details =>
         block(details)
-    }.getOrElse(Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture)
+    }.getOrElse {
+      if (waypoints.inAmend) {
+        Redirect(ChangeRegistrationPage.route(waypoints)).toFuture
+      } else {
+        Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture
+      }
+    }
 }
