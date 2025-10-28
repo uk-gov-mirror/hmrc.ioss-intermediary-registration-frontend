@@ -79,7 +79,7 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
   }
 
   def authAndRequireIntermediary(
-                                  waypoints: Waypoints,
+                                  waypoints: Waypoints = EmptyWaypoints,
                                   inAmend: Boolean,
                                   inRejoin: Boolean = false
                                 ): ActionBuilder[AuthenticatedMandatoryIntermediaryRequest, AnyContent] = {
