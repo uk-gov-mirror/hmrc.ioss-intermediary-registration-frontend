@@ -19,7 +19,7 @@
     govukButton: GovukButton
 )
 
-@(newIossReference: String)(implicit request: Request[_], messages: Messages)
+@(newIossReference: String, intermediaryYourAccountUrl: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("rejoinComplete.title")), showBackLink = false) {
 
@@ -29,6 +29,10 @@
             <h1 class="govuk-panel__title">@messages("rejoinComplete.heading")</h1>
             <div class="govuk-panel__body"> @Html(messages("rejoinComplete.newIossReference", newIossReference))</div>
         </div>
+
+        <p class="govuk-body">
+            <a href="@intermediaryYourAccountUrl" class="govuk-link">@messages("amendComplete.returnToYourAccount.link")</a>
+        </p>
 
     </div>
 

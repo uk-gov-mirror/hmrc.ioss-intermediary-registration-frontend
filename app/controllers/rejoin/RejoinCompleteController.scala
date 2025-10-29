@@ -41,7 +41,7 @@ class RejoinCompleteController @Inject()(
     implicit request =>
       val newIossReference = getNewIossReference(request.userAnswers)
 
-      Ok(view(newIossReference)).toFuture
+      Ok(view(newIossReference, frontendAppConfig.intermediaryYourAccountUrl)).toFuture
   }
 
   private def getNewIossReference(answers: UserAnswers) = {
