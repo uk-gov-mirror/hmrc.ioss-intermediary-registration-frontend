@@ -19,7 +19,7 @@ package controllers.rejoin
 import connectors.RegistrationConnector
 import controllers.actions.*
 import logging.Logging
-import pages.rejoin.RejoinSchemePage
+import pages.rejoin.{CannotRejoinPage, RejoinSchemePage}
 import play.api.mvc.{Action, MessagesControllerComponents}
 import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -59,7 +59,8 @@ class StartRejoinJourneyController @Inject()(
               Redirect(RejoinSchemePage.route(waypoints).url)
             }
           } else {
-            Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture
+            logger.warn("Cannot rejoin registration")
+            Redirect(CannotRejoinPage.route(waypoints).url).toFuture
           }
 
         case Left(error) =>

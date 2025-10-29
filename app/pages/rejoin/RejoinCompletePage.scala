@@ -16,23 +16,11 @@
 
 package pages.rejoin
 
-import models.UserAnswers
-import pages.{CheckAnswersPage, Page, Waypoints}
+import pages.{Page, Waypoints}
 import play.api.mvc.Call
 
-object RejoinSchemePage extends CheckAnswersPage {
+object RejoinCompletePage extends Page {
 
-  override def isTheSamePage(other: Page): Boolean = other match {
-    case RejoinSchemePage => true
-    case _ => false
-  }
-
-  override val urlFragment: String = "rejoin-check-your-details"
-
-  override def route(waypoints: Waypoints): Call = {
-    controllers.rejoin.routes.RejoinSchemeController.onPageLoad()
-  }
-
-  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    RejoinCompletePage
+  override def route(waypoints: Waypoints): Call =
+    controllers.rejoin.routes.RejoinCompleteController.onPageLoad()
 }

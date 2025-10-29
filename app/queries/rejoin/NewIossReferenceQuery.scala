@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
-package pages.rejoin
+package queries.rejoin
 
-import models.UserAnswers
-import pages.{CheckAnswersPage, Page, Waypoints}
-import play.api.mvc.Call
+import play.api.libs.json.JsPath
+import queries.{Gettable, Settable}
 
-object RejoinSchemePage extends CheckAnswersPage {
+object NewIossReferenceQuery extends Gettable[String] with Settable[String] {
 
-  override def isTheSamePage(other: Page): Boolean = other match {
-    case RejoinSchemePage => true
-    case _ => false
-  }
+  override def path: JsPath = JsPath \ toString
 
-  override val urlFragment: String = "rejoin-check-your-details"
-
-  override def route(waypoints: Waypoints): Call = {
-    controllers.rejoin.routes.RejoinSchemeController.onPageLoad()
-  }
-
-  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    RejoinCompletePage
+  override def toString: String = "newIossReference"
 }

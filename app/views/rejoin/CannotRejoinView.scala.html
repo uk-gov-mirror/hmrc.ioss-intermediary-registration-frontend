@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,27 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package pages.rejoin
+@this(
+    layout: templates.Layout
+)
 
-import models.UserAnswers
-import pages.{CheckAnswersPage, Page, Waypoints}
-import play.api.mvc.Call
+@()(implicit request: Request[_], messages: Messages)
 
-object RejoinSchemePage extends CheckAnswersPage {
+@layout(pageTitle = titleNoForm(messages("cannotRejoin.title"))) {
 
-  override def isTheSamePage(other: Page): Boolean = other match {
-    case RejoinSchemePage => true
-    case _ => false
-  }
+    <h1 class="govuk-heading-l">@messages("cannotRejoin.heading")</h1>
 
-  override val urlFragment: String = "rejoin-check-your-details"
-
-  override def route(waypoints: Waypoints): Call = {
-    controllers.rejoin.routes.RejoinSchemeController.onPageLoad()
-  }
-
-  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    RejoinCompletePage
 }

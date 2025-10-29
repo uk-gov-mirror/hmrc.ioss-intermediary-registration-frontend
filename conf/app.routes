@@ -210,3 +210,8 @@ GET        /cannot-use-not-registered                                       cont
 GET        /start-rejoin-journey                                            controllers.rejoin.StartRejoinJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
 GET        /rejoin-check-your-details                                       controllers.rejoin.RejoinSchemeController.onPageLoad()
+POST       /rejoin-check-your-details                                       controllers.rejoin.RejoinSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET        /successful-rejoin                                               controllers.rejoin.RejoinCompleteController.onPageLoad()
+GET        /error-submitting-rejoin                                         controllers.rejoin.ErrorSubmittingRejoinController.onPageLoad()
+GET        /cannot-rejoin                                                   controllers.rejoin.CannotRejoinController.onPageLoad()

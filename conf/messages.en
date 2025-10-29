@@ -614,6 +614,18 @@ rejoinScheme.vatRegistrationDetails.businessAddress = Principal place of busines
 rejoinScheme.vatRegistrationDetails.vatRegistrationNumber = UK VAT registration number
 rejoinScheme.vatRegistrationDetails.manageVatBTA = <a class="govuk-link" href="/business-account" rel="noreferrer noopener" target="_blank">Manage your UK VAT registration in your BTA account (opens in new tab)</a>
 rejoinScheme.iossDetails.heading = Import One Stop Shop details
-rejoinScheme.iossDetails.tradingName = Have a different UK trading name
-rejoinScheme.iossDetails.otherTradingNAmes = Other trading names
+rejoinScheme.preSubmitNote.line1 = By re-registering for this scheme, you confirm that the information you are providing is correct and complete.
+rejoinScheme.preSubmitNote.line2 = After registering, do not use the Back button or refresh the page.
 
+rejoinComplete.title = You are registered as an IOSS intermediary
+rejoinComplete.heading = You are registered as an IOSS intermediary
+rejoinComplete.newIossReference = Your new IOSS intermediary number is<br/><strong>{0}</strong>
+
+errorSubmittingRejoin.title = We have a problem with our service right now
+errorSubmittingRejoin.heading = Your registration is not submitted
+errorSubmittingRejoin.tryAgainLater = You can <a class="govuk-link" href="{0}">try again later</a>.
+errorSubmittingRejoin.contactUs = If the problem continues, you can email us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
+errorSubmittingRejoin.yourAccount = Back to your account
+
+cannotRejoin.title = You cannot use this service
+cannotRejoin.heading = You cannot use this service

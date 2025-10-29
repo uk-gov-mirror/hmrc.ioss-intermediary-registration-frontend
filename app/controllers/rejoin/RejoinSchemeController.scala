@@ -20,10 +20,12 @@ import controllers.actions.*
 import logging.Logging
 import models.{CheckMode, Country}
 import models.previousIntermediaryRegistrations.PreviousIntermediaryRegistrationDetails
-import pages.rejoin.RejoinSchemePage
-import pages.{EmptyWaypoints, Waypoint}
+import pages.rejoin.{CannotRejoinPage, RejoinSchemePage}
+import pages.{EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.rejoin.NewIossReferenceQuery
+import services.RegistrationService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, HasFixedEstablishmentSummary}
@@ -34,14 +36,19 @@ import viewmodels.govuk.summarylist.*
 import views.html.rejoin.RejoinSchemeView
 import utils.FutureSyntax.FutureOps
 
+import java.time.{Clock, LocalDate}
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
 class RejoinSchemeController @Inject()(
                                         override val messagesApi: MessagesApi,
                                         cc: AuthenticatedControllerComponents,
                                         val controllerComponents: MessagesControllerComponents,
-                                        view: RejoinSchemeView
-                                      ) extends FrontendBaseController with I18nSupport with Logging {
+                                        view: RejoinSchemeView,
+                                        registrationService: RegistrationService,
+                                        clock: Clock
+                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(): Action[AnyContent] = cc.authAndRequireIntermediary(waypoints = EmptyWaypoints, inAmend = true, inRejoin = true).async {
     implicit request =>
@@ -49,7 +56,6 @@ class RejoinSchemeController @Inject()(
       val thisPage = RejoinSchemePage
 
       val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, RejoinSchemePage.urlFragment))
-
 
       val vatRegistrationDetailsList: SummaryList =
         SummaryListViewModel(
@@ -122,5 +128,41 @@ class RejoinSchemeController @Inject()(
 
       Ok(view(waypoints, vatRegistrationDetailsList, iossDetailsList)).toFuture
 
+  }
+
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIntermediary(waypoints, inAmend = true, inRejoin = true).async {
+    implicit request =>
+      
+      val canRejoin = request.registrationWrapper.etmpDisplayRegistration.canRejoinScheme(LocalDate.now(clock))
+      
+      if(canRejoin) {
+
+        val userAnswers = request.userAnswers
+
+        registrationService.amendRegistration(
+          answers = userAnswers,
+          registration = request.registrationWrapper.etmpDisplayRegistration,
+          vrn = request.vrn,
+          iossNumber = request.intermediaryNumber,
+          rejoin = true
+        ).flatMap {
+          case Right(amendRegistrationResponse) =>
+            userAnswers.set(NewIossReferenceQuery, amendRegistrationResponse.intermediary) match
+              case Failure(throwable) =>
+                logger.error(s"Unexpected result on updating answers with new IOSS Reference: ${throwable.getMessage}", throwable)
+                Redirect(routes.ErrorSubmittingRejoinController.onPageLoad()).toFuture
+
+              case Success(updatedUserAnswer) =>
+                cc.sessionRepository.set(updatedUserAnswer).map{ _ =>
+                  Redirect(RejoinSchemePage.navigate(EmptyWaypoints, userAnswers, userAnswers).route)
+                }
+
+          case Left(error) =>
+            logger.error(s"Unexpected result on submit: ${error.body}")
+            Redirect(controllers.rejoin.routes.ErrorSubmittingRejoinController.onPageLoad().url).toFuture
+        }
+      } else {
+        Redirect(CannotRejoinPage.route(EmptyWaypoints).url).toFuture
+      }
   }
 }
