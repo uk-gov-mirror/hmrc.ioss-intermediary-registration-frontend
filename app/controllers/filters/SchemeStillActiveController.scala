@@ -17,9 +17,11 @@
 package controllers.filters
 
 import controllers.actions.*
+import models.euDetails.{EuDetails, RegistrationType}
 import models.Country
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.euDetails.AllEuDetailsQuery
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SchemeStillActiveView
 
@@ -35,8 +37,21 @@ class SchemeStillActiveController @Inject()(
 
   def onPageLoad(
                   countryCode: String
-                ): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
+                ): Action[AnyContent] = cc.authAndGetData() {
     implicit request =>
-      Ok(view(Country.getCountryName(countryCode)))
+
+      val countryName = Country.getCountryName(countryCode)
+      val allEuDetails: Option[List[EuDetails]] = request.userAnswers.get(AllEuDetailsQuery)
+      val maybeDetail = allEuDetails.flatMap(_.find(_.registrationType.isDefined))
+      val (maybeVatNumber, maybeEuTaxId) = maybeDetail match {
+        case Some(EuDetails(_, _, Some(RegistrationType.VatNumber), _, _, _)) =>
+          (true, false)
+        case Some(EuDetails(_, _, Some(RegistrationType.TaxId), _, _, _)) =>
+          (false, true)
+        case _ =>
+          (false, false)
+      }
+
+      Ok(view(countryName, maybeVatNumber, maybeEuTaxId))
   }
 }

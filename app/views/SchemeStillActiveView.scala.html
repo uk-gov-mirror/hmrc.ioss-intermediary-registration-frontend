@@ -19,16 +19,22 @@
         govukButton: GovukButton
 )
 
-@(country: String)(implicit request: Request[_], messages: Messages)
+@(country: String, maybeVatNumber: Boolean, maybeEuTaxId: Boolean)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("schemeStillActive.title")), showBackLink = false) {
 
-<h1 class="govuk-heading-l">@messages("schemeStillActive.heading")</h1>
+    <h1 class="govuk-heading-l">@messages("schemeStillActive.heading")</h1>
 
-<p class="govuk-body">@messages("schemeStillActive.p1", country)</p>
+    @if(maybeVatNumber) {
+        <p class="govuk-body">@messages("schemeStillActive.vatNumber.p1", country)</p>
+    } else if(maybeEuTaxId) {
+        <p class="govuk-body">@messages("schemeStillActive.taxId.p1", country)</p>
+    } else {
+        <p class="govuk-body">@messages("schemeStillActive.p1", country)</p>
+    }
 
-<p class="govuk-body">@messages("schemeStillActive.p2")</p>
+    <p class="govuk-body">@messages("schemeStillActive.p2")</p>
 
-<p class="govuk-body">@Html(messages("schemeStillActive.contactUs"))</p>
+    <p class="govuk-body">@Html(messages("schemeStillActive.contactUs"))</p>
 
 }

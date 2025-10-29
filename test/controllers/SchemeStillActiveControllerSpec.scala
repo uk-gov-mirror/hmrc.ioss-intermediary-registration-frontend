@@ -18,8 +18,11 @@ package controllers
 
 import base.SpecBase
 import models.Country
+import models.euDetails.EuDetails
+import models.euDetails.RegistrationType.{TaxId, VatNumber}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.euDetails.AllEuDetailsQuery
 import views.html.SchemeStillActiveView
 
 class SchemeStillActiveControllerSpec extends SpecBase {
@@ -42,7 +45,63 @@ class SchemeStillActiveControllerSpec extends SpecBase {
           val view = application.injector.instanceOf[SchemeStillActiveView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(country)(request, messages(application)).toString
+          contentAsString(result) mustEqual view(country, false, false)(request, messages(application)).toString
+        }
+      }
+
+      "must return OK and the correct view for a Already Registered Vat Number" in {
+
+        val country = Country.getCountryName("EE")
+        val euDetails = EuDetails(
+          euCountry = Country("EE", "Estonia"),
+          hasFixedEstablishment = Some(false),
+          registrationType = Some(VatNumber),
+          euVatNumber = Some("EE123456789"),
+          euTaxReference = None,
+          fixedEstablishmentAddress = None
+        )
+
+        val userAnswers = emptyUserAnswers.set(AllEuDetailsQuery, List(euDetails)).success.value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+        running(application) {
+          val request = FakeRequest(GET, controllers.filters.routes.SchemeStillActiveController.onPageLoad("EE").url)
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[SchemeStillActiveView]
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(country, true, false)(request, messages(application)).toString
+        }
+      }
+
+      "must return OK and the correct view for a Already Registered Tax" in {
+
+        val country = Country.getCountryName("EE")
+        val euDetails = EuDetails(
+          euCountry = Country("EE", "Estonia"),
+          hasFixedEstablishment = Some(false),
+          registrationType = Some(TaxId),
+          euVatNumber = None,
+          euTaxReference = Some("ABC123123"),
+          fixedEstablishmentAddress = None
+        )
+
+        val userAnswers = emptyUserAnswers.set(AllEuDetailsQuery, List(euDetails)).success.value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+        running(application) {
+          val request = FakeRequest(GET, controllers.filters.routes.SchemeStillActiveController.onPageLoad("EE").url)
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[SchemeStillActiveView]
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(country, false, true)(request, messages(application)).toString
         }
       }
 

@@ -21,14 +21,22 @@
 
 @(
     memberState: String,
-    exclusionDate: String
+    exclusionDate: String,
+    maybeVatNumber: Boolean,
+    maybeEuTaxId: Boolean
 )(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("otherCountryExcludedAndQuarantined.title"))) {
 
     <h1 class="govuk-heading-l">@messages("otherCountryExcludedAndQuarantined.heading")</h1>
 
-    <p class="govuk-body">@Html(messages("otherCountryExcludedAndQuarantined.paragraph", memberState, exclusionDate))</p>
+    @if(maybeVatNumber) {
+        <p class="govuk-body">@Html(messages("otherCountryExcludedAndQuarantined.vatNumber.paragraph"))</p>
+    } else if(maybeEuTaxId) {
+        <p class="govuk-body">@Html(messages("otherCountryExcludedAndQuarantined.taxId.paragraph"))</p>
+    } else {
+        <p class="govuk-body">@Html(messages("otherCountryExcludedAndQuarantined.paragraph", memberState, exclusionDate))</p>
+    }
 
     <p class="govuk-body">@Html(messages("otherCountryExcludedAndQuarantined.contact"))</p>
 }

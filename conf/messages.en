@@ -493,12 +493,16 @@ error.resolve_missing_answers = Resolve missing answers
 schemeStillActive.title = You cannot register for this service
 schemeStillActive.heading = You cannot register for this service
 schemeStillActive.p1 = This IOSS intermediaries registration in {0} is still active.
+schemeStillActive.vatNumber.p1 = This Vat number is linked to an IOSS intermediary account in {0} that is still active.
+schemeStillActive.taxId.p1 = This Tax reference is linked to an IOSS intermediary account in {0} that is still active.
 schemeStillActive.p2 = You can only have one active IOSS intermediaries account.
 schemeStillActive.contactUs = For more information, contact us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
 
 otherCountryExcludedAndQuarantined.title = You cannot register for this service
 otherCountryExcludedAndQuarantined.heading = You cannot register for this service
 otherCountryExcludedAndQuarantined.paragraph = {0} has blocked your account from registering as an intermediary on all One Stop Shop services until {1}.
+otherCountryExcludedAndQuarantined.vatNumber.paragraph = This VAT number is linked to an account that is excluded from all One Stop Shop services.
+otherCountryExcludedAndQuarantined.taxId.paragraph = This Tax reference is linked to an account that is excluded from all One Stop Shop services.
 otherCountryExcludedAndQuarantined.contact = If you believe this is an error, contact <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
 
 niAddress.title = What is your business address in Northern Ireland?
