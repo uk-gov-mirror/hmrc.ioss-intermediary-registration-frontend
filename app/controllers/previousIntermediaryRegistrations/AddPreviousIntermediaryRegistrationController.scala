@@ -84,7 +84,7 @@ class AddPreviousIntermediaryRegistrationController @Inject()(
                                                    waypoints: Waypoints,
                                                    request: AuthenticatedDataRequest[AnyContent]
                                                  ): Seq[PreviousIntermediaryRegistrationDetails] = {
-    if (waypoints.inAmend) {
+    if (waypoints.inAmend || waypoints.inRejoin) {
       request.registrationWrapper.flatMap(_.etmpDisplayRegistration.intermediaryDetails.map(_.otherIossIntermediaryRegistrations))
         .map(PreviousIntermediaryRegistrationDetails.fromOtherIossIntermediaryRegistrations)
         .getOrElse(Seq.empty)
