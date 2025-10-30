@@ -52,11 +52,7 @@ object VatRegistrationDetailsSummary {
   def rowVatNumber()(implicit messages: Messages, request: AuthenticatedDataRequest[AnyContent]): Option[SummaryListRow] = {
     Some(createNameSummaryListRow(request.vrn.vrn, "vatRegistrationNumber"))
   }
-
-  def rowVatNumberWithoutRequest(registrationWrapper: RegistrationWrapper)(implicit messages: Messages): Option[SummaryListRow] = {
-    Some(createNameSummaryListRow(registrationWrapper.etmpDisplayRegistration.customerIdentification.idValue, "vatRegistrationNumber"))
-  }
-
+  
   def rowBusinessAddress(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
     answers.vatInfo.map {
       answer =>

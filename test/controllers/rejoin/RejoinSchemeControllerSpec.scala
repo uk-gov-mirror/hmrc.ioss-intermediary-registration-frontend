@@ -17,10 +17,12 @@
 package controllers.rejoin
 
 import base.SpecBase
+import models.requests.AuthenticatedDataRequest
 import models.{CheckMode, UserAnswers}
 import pages.rejoin.RejoinSchemePage
 import pages.{EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.Messages
+import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import testutils.CheckYourAnswersSummaries.FluentSummaryListRow
@@ -68,9 +70,15 @@ class RejoinSchemeControllerSpec extends SpecBase {
 
   private def getChangeRegistrationVatRegistrationDetailsSummaryList(answers: UserAnswers)(implicit msgs: Messages): Seq[SummaryListRow] = {
 
+    implicit val authRequest: AuthenticatedDataRequest[AnyContent] =
+      AuthenticatedDataRequest(
+        fakeRequest, testCredentials, vrn, testEnrolments, answers, None, 0, None, None, None, None
+      )
+
     Seq(
-      VatRegistrationDetailsSummary.rowVatNumberWithoutRequest(registrationWrapper),
+      VatRegistrationDetailsSummary.rowBasedInUk(answers),
       VatRegistrationDetailsSummary.rowBusinessName(answers),
+      VatRegistrationDetailsSummary.rowVatNumber(),
       VatRegistrationDetailsSummary.rowBusinessAddress(answers)
     ).flatten
   }

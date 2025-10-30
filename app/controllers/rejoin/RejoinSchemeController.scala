@@ -16,10 +16,12 @@
 
 package controllers.rejoin
 
+import config.Constants.niPostCodeAreaPrefix
 import controllers.actions.*
 import logging.Logging
 import models.{CheckMode, Country}
 import models.previousIntermediaryRegistrations.PreviousIntermediaryRegistrationDetails
+import models.requests.AuthenticatedDataRequest
 import pages.rejoin.{CannotRejoinPage, RejoinSchemePage}
 import pages.{EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -59,11 +61,7 @@ class RejoinSchemeController @Inject()(
 
       val vatRegistrationDetailsList: SummaryList =
         SummaryListViewModel(
-          rows = Seq(
-            VatRegistrationDetailsSummary.rowVatNumberWithoutRequest(request.registrationWrapper),
-            VatRegistrationDetailsSummary.rowBusinessName(request.userAnswers),
-            VatRegistrationDetailsSummary.rowBusinessAddress(request.userAnswers)
-          ).flatten
+          rows = determineVatRegistrationDetailsList()(request.request)
         )
 
       val existingPreviousRegistrations: Seq[PreviousIntermediaryRegistrationDetails] =
@@ -132,9 +130,9 @@ class RejoinSchemeController @Inject()(
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIntermediary(waypoints, inAmend = true, inRejoin = true).async {
     implicit request =>
-      
+
       val canRejoin = request.registrationWrapper.etmpDisplayRegistration.canRejoinScheme(LocalDate.now(clock))
-      
+
       if(canRejoin) {
 
         val userAnswers = request.userAnswers
@@ -164,5 +162,23 @@ class RejoinSchemeController @Inject()(
       } else {
         Redirect(CannotRejoinPage.route(EmptyWaypoints).url).toFuture
       }
+  }
+
+  private def determineVatRegistrationDetailsList()(implicit request: AuthenticatedDataRequest[AnyContent]): Seq[SummaryListRow] = {
+
+    val rows = Seq(
+      VatRegistrationDetailsSummary.rowBasedInUk(request.userAnswers),
+      VatRegistrationDetailsSummary.rowBusinessName(request.userAnswers),
+      VatRegistrationDetailsSummary.rowVatNumber()
+    ).flatten
+
+    val isNiBasedIntermediary = request.userAnswers.vatInfo
+      .flatMap(_.desAddress.postCode)
+      .exists(_.toUpperCase.startsWith(niPostCodeAreaPrefix))
+    if (!isNiBasedIntermediary) {
+      rows
+    } else {
+      rows ++ VatRegistrationDetailsSummary.rowBusinessAddress(request.userAnswers)
+    }
   }
 }
