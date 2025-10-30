@@ -197,7 +197,7 @@ eligibleToRegister.p1 = You can log into the Government Gateway service to conti
 
 hasTradingName.title = Does your business trade using a name that is different from {0}?
 hasTradingName.heading = Does your business trade using a name that is different from {0}?
-hasTradingName.checkYourAnswersLabel = Have a different UK trading name
+hasTradingName.checkYourAnswersLabel = Have other trading names
 hasTradingName.error.required = Select yes if you use a different trading name
 hasTradingName.change.hidden = if you have a different trading name
 
