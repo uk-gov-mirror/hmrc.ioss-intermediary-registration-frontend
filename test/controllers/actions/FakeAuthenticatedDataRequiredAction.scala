@@ -31,10 +31,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 case class FakeAuthenticatedDataRequiredAction(
                                                 isInAmendMode: Boolean,
+                                                isInRejoinMode: Boolean,
                                                 dataToReturn: Option[UserAnswers],
                                                 registrationWrapper: Option[RegistrationWrapper]
                                               )
-  extends AuthenticatedDataRequiredActionImpl(mockRegistrationConnector, isInAmendMode = isInAmendMode)(ExecutionContext.Implicits.global) {
+  extends AuthenticatedDataRequiredActionImpl(mockRegistrationConnector, isInAmendMode = isInAmendMode, isInRejoinMode = isInRejoinMode)(ExecutionContext.Implicits.global) {
 
   override protected def refine[A](request: AuthenticatedOptionalDataRequest[A]): Future[Either[Result, AuthenticatedDataRequest[A]]] = {
 
@@ -66,8 +67,8 @@ class FakeAuthenticatedDataRequiredActionProvider(
                                                  )
   extends AuthenticatedDataRequiredAction(mockRegistrationConnector)(ExecutionContext.Implicits.global) {
 
-  override def apply(isInAmendMode: Boolean): FakeAuthenticatedDataRequiredAction = {
-    new FakeAuthenticatedDataRequiredAction(isInAmendMode, dataToReturn, registrationWrapper)
+  override def apply(isInAmendMode: Boolean, isInRejoinMode: Boolean): FakeAuthenticatedDataRequiredAction = {
+    new FakeAuthenticatedDataRequiredAction(isInAmendMode, isInRejoinMode, dataToReturn, registrationWrapper)
   }
 }
 

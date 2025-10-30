@@ -43,7 +43,7 @@ class NiAddressController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend, waypoints.inRejoin) {
     implicit request =>
 
       val form: Form[UkAddress] = formProvider()
@@ -55,7 +55,7 @@ class NiAddressController @Inject()(
       Ok(view(preparedForm, waypoints))
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend, waypoints.inRejoin).async {
     implicit request =>
 
       val form: Form[UkAddress] = formProvider()
@@ -70,7 +70,7 @@ class NiAddressController @Inject()(
               updatedAnswers <- Future.fromTry(request.userAnswers.set(NiAddressPage, value))
               _ <- cc.sessionRepository.set(updatedAnswers)
             } yield Redirect(NiAddressPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
-          } else if (!value.postCode.toUpperCase.startsWith(niPostCodeAreaPrefix) && waypoints.inAmend) {
+          } else if (!value.postCode.toUpperCase.startsWith(niPostCodeAreaPrefix) && (waypoints.inAmend || waypoints.inRejoin)) {
             for {
               updatedAnswers <- Future.fromTry(request.userAnswers.set(NiAddressPage, value))
               _ <- cc.sessionRepository.set(updatedAnswers)
