@@ -54,6 +54,8 @@ class DeleteAllPreviousIntermediaryRegistrationsController @Inject()(
   private def protectAgainstAmendMode[A](waypoints: Waypoints)(action: => A): A = {
     if (waypoints.inAmend) {
       throw new InvalidAmendModeOperationException("Cannot do this action while in amend mode")
+    } else if (waypoints.inRejoin) {
+      throw new InvalidAmendModeOperationException("Cannot do this action while in rejoin mode")
     } else {
       action
     }
