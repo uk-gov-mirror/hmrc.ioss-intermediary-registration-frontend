@@ -47,9 +47,7 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
   def retrieveSaveForLaterUserAnswers: SaveForLaterRetrievalActionProvider
 
   def requireIntermediary: IntermediaryRequiredAction
-
-  def requireIoss: IossRequiredAction
-
+  
   def authAndGetOptionalData(): ActionBuilder[AuthenticatedOptionalDataRequest, AnyContent] = {
     actionBuilder andThen
       identify andThen
@@ -79,14 +77,6 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
       requireIntermediary()
   }
 
-  def authAndRequireIoss(
-                          waypoints: Waypoints,
-                          inAmend: Boolean
-                        ): ActionBuilder[AuthenticatedMandatoryIossRequest, AnyContent] = {
-    authAndGetDataAndCheckVerifyEmail(waypoints, inAmend) andThen
-      requireIoss()
-  }
-
   def authAndGetData(inAmend: Boolean = false): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
     actionBuilder andThen
       identify andThen
@@ -114,6 +104,5 @@ case class DefaultAuthenticatedControllerComponents @Inject()(
                                                                checkEmailVerificationStatus: CheckEmailVerificationFilterProvider,
                                                                checkOtherCountryRegistration: CheckOtherCountryRegistrationFilter,
                                                                retrieveSaveForLaterUserAnswers: SaveForLaterRetrievalActionProvider,
-                                                               requireIntermediary: IntermediaryRequiredAction,
-                                                               requireIoss: IossRequiredAction
+                                                               requireIntermediary: IntermediaryRequiredAction
                                                              ) extends AuthenticatedControllerComponents
