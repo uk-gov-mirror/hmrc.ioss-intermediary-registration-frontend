@@ -20,10 +20,14 @@ import base.SpecBase
 import config.Constants.addQuarantineYears
 import connectors.RegistrationConnector
 import formats.Format.dateFormatter
+import models.Country
+import models.euDetails.EuDetails
+import models.euDetails.RegistrationType.{TaxId, VatNumber}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.euDetails.AllEuDetailsQuery
 import views.html.OtherCountryExcludedAndQuarantinedView
 
 import java.time.LocalDate
@@ -53,7 +57,73 @@ class OtherCountryExcludedAndQuarantinedControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[OtherCountryExcludedAndQuarantinedView]
 
         status(result) `mustBe` OK
-        contentAsString(result) `mustBe` view(countryName, formattedEffectiveDecisionDate)(request, messages(application)).toString
+        contentAsString(result) `mustBe` view(countryName, formattedEffectiveDecisionDate, false, false)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a Quarantined Vat Number" in {
+
+      val countryCode: String = "NL"
+      val countryName: String = "Netherlands"
+      val effectiveDecisionDate = "2022-10-10"
+      val formattedEffectiveDecisionDate = LocalDate.parse(effectiveDecisionDate).plusYears(addQuarantineYears).format(dateFormatter)
+      val euDetails = EuDetails(
+        euCountry = Country("EE", "Estonia"),
+        hasFixedEstablishment = Some(false),
+        registrationType = Some(VatNumber),
+        euVatNumber = None,
+        euTaxReference = Some("ABC123123"),
+        fixedEstablishmentAddress = None
+      )
+
+      val userAnswers = emptyUserAnswers.set(AllEuDetailsQuery, List(euDetails)).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(countryCode, effectiveDecisionDate).url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[OtherCountryExcludedAndQuarantinedView]
+
+        status(result) `mustBe` OK
+        contentAsString(result) `mustBe` view(countryName, formattedEffectiveDecisionDate, true, false)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a Quarantined Tax Reference" in {
+
+      val countryCode: String = "NL"
+      val countryName: String = "Netherlands"
+      val effectiveDecisionDate = "2022-10-10"
+      val formattedEffectiveDecisionDate = LocalDate.parse(effectiveDecisionDate).plusYears(addQuarantineYears).format(dateFormatter)
+      val euDetails = EuDetails(
+        euCountry = Country("EE", "Estonia"),
+        hasFixedEstablishment = Some(false),
+        registrationType = Some(TaxId),
+        euVatNumber = None,
+        euTaxReference = Some("ABC123123"),
+        fixedEstablishmentAddress = None
+      )
+
+      val userAnswers = emptyUserAnswers.set(AllEuDetailsQuery, List(euDetails)).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(countryCode, effectiveDecisionDate).url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[OtherCountryExcludedAndQuarantinedView]
+
+        status(result) `mustBe` OK
+        contentAsString(result) `mustBe` view(countryName, formattedEffectiveDecisionDate, false, true)(request, messages(application)).toString
       }
     }
   }

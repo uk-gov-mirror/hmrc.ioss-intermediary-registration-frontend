@@ -20,8 +20,10 @@ import config.Constants.addQuarantineYears
 import controllers.actions.*
 import formats.Format.dateFormatter
 import models.Country
+import models.euDetails.{EuDetails, RegistrationType}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.euDetails.AllEuDetailsQuery
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.OtherCountryExcludedAndQuarantinedView
 
@@ -39,11 +41,22 @@ class OtherCountryExcludedAndQuarantinedController @Inject()(
   def onPageLoad(
                   countryCode: String,
                   exclusionDate: String
-                ): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
+                ): Action[AnyContent] = cc.authAndGetData() {
     implicit request =>
 
+      val countryName = Country.getCountryName(countryCode)
       val exclusionDateFormatted: String = LocalDate.parse(exclusionDate).plusYears(addQuarantineYears).format(dateFormatter)
+      val allEuDetails: Option[List[EuDetails]] = request.userAnswers.get(AllEuDetailsQuery)
+      val maybeDetail = allEuDetails.flatMap(_.find(_.registrationType.isDefined))
+      val (maybeVatNumber, maybeEuTaxId) = maybeDetail match {
+        case Some(EuDetails(_, _, Some(RegistrationType.VatNumber), _, _, _)) =>
+          (true, false)
+        case Some(EuDetails(_, _, Some(RegistrationType.TaxId), _, _, _)) =>
+          (false, true)
+        case _ =>
+          (false, false)
+      }
 
-      Ok(view(Country.getCountryName(countryCode), exclusionDateFormatted))
+      Ok(view(countryName, exclusionDateFormatted, maybeVatNumber, maybeEuTaxId))
   }
 }
