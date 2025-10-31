@@ -122,7 +122,7 @@ class ChangeRegistrationController @Inject()(
             bankDetailsIbanRow
           ).flatten
         )
-// TODO: add isCurrentIossAccount with  msg
+// TODO: add isCurrentIntermediaryAccount with  msg
         Ok(view(waypoints, vatRegistrationDetailsList, list, request.intermediaryNumber, hasPreviousRegistrations)).toFuture
   }
 
