@@ -565,3 +565,5 @@ noRegistrationInProgress.sessionExpired = Your previous session may have expired
 
 notRegistered.title = You cannot use this service
 notRegistered.heading = You cannot use this service
+
+viewOrChangePreviousRegistration.heading = Do you want to view or change the details of your previous IOSS intermediary registration, {0}?
