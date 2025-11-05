@@ -45,6 +45,7 @@ class AuthenticatedDataRequiredActionImpl @Inject()(
       case Some(data) =>
         val eventualMaybeRegistrationWrapper = {
           if (isInAmendMode) {
+            println("\n\n AuthenticatedDataRequiredActionImpl: some UserAnswers/ is inAmend")
             val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request.request, request.session)
             val intermediaryNumber = request.intermediaryNumber.getOrElse(throw new Exception("No Intermediary Number"))
             registrationConnector.displayRegistration(intermediaryNumber)(hc).flatMap {
@@ -55,6 +56,7 @@ class AuthenticatedDataRequiredActionImpl @Inject()(
                 Some(registrationWrapper).toFuture
             }
           } else {
+            println("\n\n AuthenticatedDataRequiredActionImpl: some UserAnswers/ Not inAmend")
             None.toFuture
           }
         }

@@ -16,6 +16,8 @@
 
 @import viewmodels.InputWidth._
 @import pages.amend.ChangeRegistrationPage
+@import pages.amend.StartAmendJourneyPage
+@import pages.amend.ViewOrChangePreviousRegistrationPage
 @import components.CancelAmendRegistrationButton
 
 @this(
@@ -37,7 +39,7 @@
 
     @if(hasPreviousRegistrations) {
         <p class="govuk-body govuk-!-margin-bottom-6">
-                <a class="govuk-link" id="change-previous-registrations" href="">@messages("changeRegistration.changePreviousRegistration")</a>
+                <a class="govuk-link" id="change-previous-registrations" href="@ViewOrChangePreviousRegistrationPage.route(waypoints).url">@messages("changeRegistration.changePreviousRegistration")</a>
         </p>
     }
 

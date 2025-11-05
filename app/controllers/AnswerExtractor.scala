@@ -18,11 +18,11 @@ package controllers
 
 import logging.Logging
 import models.UserAnswers
-import models.requests.AuthenticatedDataRequest
+import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIntermediaryRequest, GenericRequest}
 import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.libs.json.{JsArray, JsObject, Reads}
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{AnyContent, Result}
+import play.api.mvc.{AnyContent, Result, WrappedRequest}
 import queries.{Derivable, Gettable, Settable}
 import utils.FutureSyntax.FutureOps
 
@@ -45,7 +45,7 @@ trait AnswerExtractor extends Logging {
 
   def getAnswerAsync[A](waypoints: Waypoints, query: Gettable[A])
                        (block: A => Future[Result])
-                       (implicit request: AuthenticatedDataRequest[AnyContent], ev: Reads[A]): Future[Result] = {
+                       (implicit request: GenericRequest[AnyContent], ev: Reads[A]): Future[Result] = {
     request.userAnswers
       .get(query)
       .map(block(_))

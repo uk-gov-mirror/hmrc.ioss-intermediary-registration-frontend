@@ -17,15 +17,16 @@
 package controllers.amend
 
 import config.Constants.niPostCodeAreaPrefix
-import controllers.actions.*
+import controllers.actions.{AmendingPreviousRegistration, *}
 import logging.Logging
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIntermediaryRequest}
 import models.{CheckMode, Country}
 import models.previousIntermediaryRegistrations.PreviousIntermediaryRegistrationDetails
-import pages.amend.ChangeRegistrationPage
-import pages.{EmptyWaypoints, Waypoint, Waypoints}
+import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
+import pages.{CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.amend.PreviousRegistrationIntermediaryNumberQuery
 import services.RegistrationService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -48,15 +49,35 @@ class ChangeRegistrationController @Inject()(
                                         view: ChangeRegistrationView
                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  def onPageLoad: Action[AnyContent] = cc.authAndRequireIntermediary(waypoints = EmptyWaypoints, inAmend = true).async {
+  def onPageLoad(isPreviousRegistration: Boolean): Action[AnyContent] = cc.authAndRequireIntermediary(waypoints = EmptyWaypoints, inAmend = true).async {
+
+    val modifyingExistingRegistrationMode = if (isPreviousRegistration) {
+      AmendingPreviousRegistration
+    } else {
+      AmendingActiveRegistration
+    }
 
       implicit request: AuthenticatedMandatoryIntermediaryRequest[AnyContent] =>
-        
+
+        println("\n\n ChangeRegistrationController: onPageLoad Request")
+        println(request.userAnswers)
+        println(request.intermediaryNumber)
+        val selectedPreviousRegistration: Option[String] = request.userAnswers.get(PreviousRegistrationIntermediaryNumberQuery)
+
+        val thisPage: CheckAnswersPage = if (isPreviousRegistration) {
+            ChangePreviousRegistrationPage
+          } else {
+            ChangeRegistrationPage
+          }
+
+          val waypoints =
+            if (isPreviousRegistration) {
+              EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangePreviousRegistrationPage.urlFragment))
+            } else {
+              EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangeRegistrationPage.urlFragment))
+            }
+
         val hasPreviousRegistrations: Boolean = request.hasMultipleIntermediaryEnrolments
-
-        val thisPage = ChangeRegistrationPage
-
-        val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
         val vatRegistrationDetailsList: SummaryList =
           SummaryListViewModel(
