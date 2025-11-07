@@ -53,7 +53,7 @@ class AddPreviousIntermediaryRegistrationController @Inject()(
 
   private val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend, waypoints.inRejoin).async {
     implicit request =>
 
       val previousRegistration = getPreviousRegistrationsWhenInAmend(waypoints, request)
@@ -84,7 +84,7 @@ class AddPreviousIntermediaryRegistrationController @Inject()(
                                                    waypoints: Waypoints,
                                                    request: AuthenticatedDataRequest[AnyContent]
                                                  ): Seq[PreviousIntermediaryRegistrationDetails] = {
-    if (waypoints.inAmend) {
+    if (waypoints.inAmend || waypoints.inRejoin) {
       request.registrationWrapper.flatMap(_.etmpDisplayRegistration.intermediaryDetails.map(_.otherIossIntermediaryRegistrations))
         .map(PreviousIntermediaryRegistrationDetails.fromOtherIossIntermediaryRegistrations)
         .getOrElse(Seq.empty)
@@ -93,7 +93,7 @@ class AddPreviousIntermediaryRegistrationController @Inject()(
     }
   }
 
-  def onSubmit(waypoints: Waypoints, incompletePromptShown: Boolean): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onSubmit(waypoints: Waypoints, incompletePromptShown: Boolean): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend, waypoints.inRejoin).async {
     implicit request =>
 
       withCompleteDataAsync[PreviousIntermediaryRegistrationDetailsWithOptionalIntermediaryNumber](

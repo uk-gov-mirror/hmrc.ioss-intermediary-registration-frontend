@@ -36,6 +36,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class CheckEmailVerificationFilterImpl(
                                         waypoints: Waypoints,
                                         inAmend: Boolean,
+                                        inRejoin: Boolean,
                                         frontendAppConfig: FrontendAppConfig,
                                         emailVerificationService: EmailVerificationService,
                                         saveForLaterService: SaveForLaterService
@@ -46,7 +47,7 @@ class CheckEmailVerificationFilterImpl(
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
     val dataRequest: AuthenticatedDataRequest[_] = request
 
-    if (frontendAppConfig.emailVerificationEnabled && !inAmend) {
+    if (frontendAppConfig.emailVerificationEnabled && !inAmend && !inRejoin) {
       request.userAnswers.get(ContactDetailsPage) match {
         case Some(contactDetails) =>
           emailVerificationService.isEmailVerified(contactDetails.emailAddress, request.userId).flatMap {
@@ -87,7 +88,7 @@ class CheckEmailVerificationFilterProvider @Inject()(
                                                       saveForLaterService: SaveForLaterService
                                                     )(implicit executionContext: ExecutionContext) {
 
-  def apply(waypoints: Waypoints, inAmend: Boolean): CheckEmailVerificationFilterImpl = {
-    new CheckEmailVerificationFilterImpl(waypoints, inAmend, frontendAppConfig, emailVerificationService, saveForLaterService)
+  def apply(waypoints: Waypoints, inAmend: Boolean, inRejoin: Boolean): CheckEmailVerificationFilterImpl = {
+    new CheckEmailVerificationFilterImpl(waypoints, inAmend, inRejoin, frontendAppConfig, emailVerificationService, saveForLaterService)
   }
 }

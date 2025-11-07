@@ -33,7 +33,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AuthenticatedDataRequiredActionImpl @Inject()(
                                                      registrationConnector: RegistrationConnector,
-                                                     isInAmendMode: Boolean
+                                                     isInAmendMode: Boolean,
+                                                     isInRejoinMode: Boolean
                                                    )(implicit val executionContext: ExecutionContext)
   extends ActionRefiner[AuthenticatedOptionalDataRequest, AuthenticatedDataRequest] {
 
@@ -44,7 +45,7 @@ class AuthenticatedDataRequiredActionImpl @Inject()(
         Left(Redirect(routes.JourneyRecoveryController.onPageLoad())).toFuture
       case Some(data) =>
         val eventualMaybeRegistrationWrapper = {
-          if (isInAmendMode) {
+          if (isInAmendMode || isInRejoinMode) {
             val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request.request, request.session)
             val intermediaryNumber = request.intermediaryNumber.getOrElse(throw new Exception("No Intermediary Number"))
             registrationConnector.displayRegistration(intermediaryNumber)(hc).flatMap {
@@ -82,8 +83,8 @@ class AuthenticatedDataRequiredActionImpl @Inject()(
 
 class AuthenticatedDataRequiredAction @Inject()(registrationConnector: RegistrationConnector)(implicit executionContext: ExecutionContext) {
 
-  def apply(isInAmendMode: Boolean): AuthenticatedDataRequiredActionImpl = {
-    new AuthenticatedDataRequiredActionImpl(registrationConnector, isInAmendMode)
+  def apply(isInAmendMode: Boolean, isInRejoinMode: Boolean): AuthenticatedDataRequiredActionImpl = {
+    new AuthenticatedDataRequiredActionImpl(registrationConnector, isInAmendMode, isInRejoinMode)
   }
 }
 

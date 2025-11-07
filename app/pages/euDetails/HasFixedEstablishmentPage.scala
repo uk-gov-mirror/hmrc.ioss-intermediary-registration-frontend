@@ -48,6 +48,7 @@ case object HasFixedEstablishmentPage extends QuestionPage[Boolean] {
       case (Some(true), _) => EuCountryPage(Index(0))
       case (Some(false), Some(euDetails)) if euDetails.nonEmpty => DeleteAllEuDetailsPage
       case (Some(false), _) if waypoints.inAmend => ChangeRegistrationPage
+      case (Some(false), _) if waypoints.inRejoin => ChangeRegistrationPage
       case (Some(false), _) => CheckYourAnswersPage
       case _ => JourneyRecoveryPage
     }

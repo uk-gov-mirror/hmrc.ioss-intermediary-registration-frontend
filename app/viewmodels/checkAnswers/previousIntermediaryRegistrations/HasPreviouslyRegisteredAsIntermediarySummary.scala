@@ -36,7 +36,7 @@ object HasPreviouslyRegisteredAsIntermediarySummary {
     answers.get(HasPreviouslyRegisteredAsIntermediaryPage).map { answer =>
 
       val value = if (answer) "site.yes" else "site.no"
-      val actions = if (answer && waypoints.inAmend) {
+      val actions = if (answer && (waypoints.inAmend || waypoints.inRejoin)) {
         Seq.empty
       } else {
         Seq(

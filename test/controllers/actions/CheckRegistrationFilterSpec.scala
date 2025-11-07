@@ -34,7 +34,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
   private val intermediaryEnrolmentKey = "HMRC-IOSS-INT"
   private val enrolment: Enrolment = Enrolment(intermediaryEnrolmentKey, Seq.empty, "test", None)
 
-  class Harness(inAmend: Boolean, config: FrontendAppConfig) extends CheckRegistrationFilterImpl(inAmend, config){
+  class Harness(inAmend: Boolean, inRejoin: Boolean, config: FrontendAppConfig) extends CheckRegistrationFilterImpl(inAmend, inRejoin, config){
     def callFilter[A](request: AuthenticatedIdentifierRequest[A]): Future[Option[Result]] =
       filter(request)
   }
@@ -48,7 +48,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None, 1, None, None, None)
-        val controller = new Harness(false, config)
+        val controller = new Harness(false, false, config)
 
         val result = controller.callFilter(request).futureValue
 
@@ -64,7 +64,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None, 1, None, None, None)
-        val controller = new Harness(false, config)
+        val controller = new Harness(false, false, config)
 
         val result = controller.callFilter(request).futureValue
 
@@ -79,7 +79,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None, 1, None, None, None)
-        val controller = new Harness(true, config)
+        val controller = new Harness(true, false, config)
 
         val result = controller.callFilter(request).futureValue
 

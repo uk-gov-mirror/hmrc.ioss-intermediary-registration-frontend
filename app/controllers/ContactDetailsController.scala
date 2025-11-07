@@ -24,6 +24,7 @@ import models.ContactDetails
 import models.emailVerification.PasscodeAttemptsStatus.*
 import models.requests.AuthenticatedDataRequest
 import pages.amend.ChangeRegistrationPage
+import pages.rejoin.RejoinSchemePage
 
 import javax.inject.Inject
 import pages.{BankDetailsPage, CheckYourAnswersPage, ContactDetailsPage, Waypoints}
@@ -52,7 +53,7 @@ class ContactDetailsController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] =
-    cc.authAndGetData(waypoints.inAmend) {
+    cc.authAndGetData(waypoints.inAmend, waypoints.inRejoin) {
       implicit request =>
 
         val ossRegistration = request.latestOssRegistration
@@ -68,7 +69,7 @@ class ContactDetailsController @Inject()(
     }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] =  {
-    cc.authAndGetData(waypoints.inAmend).async {
+    cc.authAndGetData(waypoints.inAmend, waypoints.inRejoin).async {
       implicit request =>
 
         val ossRegistration = request.latestOssRegistration
@@ -84,6 +85,8 @@ class ContactDetailsController @Inject()(
           value => {
             val continueUrl = if (waypoints.inAmend) {
               s"${config.loginContinueUrl}${ChangeRegistrationPage.route(waypoints).url}"
+            } else if (waypoints.inRejoin) {
+              s"${config.loginContinueUrl}${RejoinSchemePage.route(waypoints).url}"
             } else if (bankDetailsCompleted) {
               s"${config.loginContinueUrl}${CheckYourAnswersPage.route(waypoints).url}"
             } else {

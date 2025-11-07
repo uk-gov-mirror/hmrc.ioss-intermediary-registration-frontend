@@ -17,6 +17,7 @@
 package viewmodels.checkAnswers
 
 import models.UserAnswers
+import models.etmp.display.RegistrationWrapper
 import models.requests.AuthenticatedDataRequest
 import play.api.i18n.Messages
 import play.api.mvc.AnyContent
@@ -51,7 +52,7 @@ object VatRegistrationDetailsSummary {
   def rowVatNumber()(implicit messages: Messages, request: AuthenticatedDataRequest[AnyContent]): Option[SummaryListRow] = {
     Some(createNameSummaryListRow(request.vrn.vrn, "vatRegistrationNumber"))
   }
-
+  
   def rowBusinessAddress(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
     answers.vatInfo.map {
       answer =>

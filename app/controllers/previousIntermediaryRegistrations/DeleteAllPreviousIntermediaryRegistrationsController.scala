@@ -44,7 +44,7 @@ class DeleteAllPreviousIntermediaryRegistrationsController @Inject()(
 
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend, waypoints.inRejoin) {
     implicit request =>
       protectAgainstAmendMode(waypoints) {
         Ok(view(form, waypoints))
@@ -54,12 +54,14 @@ class DeleteAllPreviousIntermediaryRegistrationsController @Inject()(
   private def protectAgainstAmendMode[A](waypoints: Waypoints)(action: => A): A = {
     if (waypoints.inAmend) {
       throw new InvalidAmendModeOperationException("Cannot do this action while in amend mode")
+    } else if (waypoints.inRejoin) {
+      throw new InvalidAmendModeOperationException("Cannot do this action while in rejoin mode")
     } else {
       action
     }
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend, waypoints.inRejoin).async {
     implicit request =>
 
       form.bindFromRequest().fold(

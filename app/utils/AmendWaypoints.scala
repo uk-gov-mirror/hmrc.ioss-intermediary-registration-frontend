@@ -17,7 +17,8 @@
 package utils
 
 import pages.amend.ChangeRegistrationPage
-import pages.{NonEmptyWaypoints, Waypoints}
+import pages.rejoin.RejoinSchemePage
+import pages.{CheckAnswersPage, NonEmptyWaypoints, Waypoints}
 
 object AmendWaypoints {
 
@@ -26,6 +27,15 @@ object AmendWaypoints {
       waypoints match {
         case nonEmptyWaypoints: NonEmptyWaypoints =>
           nonEmptyWaypoints.waypoints.toList.map(_.urlFragment).contains(ChangeRegistrationPage.urlFragment)
+        case _ =>
+          false
+      }
+    }
+
+    def inRejoin: Boolean = {
+      waypoints match {
+        case nonEmptyWaypoints: NonEmptyWaypoints =>
+          nonEmptyWaypoints.waypoints.toList.map(_.urlFragment).contains(RejoinSchemePage.urlFragment)
         case _ =>
           false
       }

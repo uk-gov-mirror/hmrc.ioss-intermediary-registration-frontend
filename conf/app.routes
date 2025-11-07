@@ -205,3 +205,13 @@ POST       /continue-registration                                           cont
 GET        /no-registration-in-progress                                     controllers.NoRegistrationInProgressController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
 GET        /cannot-use-not-registered                                       controllers.NotRegisteredController.onPageLoad()
+
+# Rejoin Scheme section
+GET        /start-rejoin-journey                                            controllers.rejoin.StartRejoinJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET        /rejoin-check-your-details                                       controllers.rejoin.RejoinSchemeController.onPageLoad()
+POST       /rejoin-check-your-details                                       controllers.rejoin.RejoinSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET        /successful-rejoin                                               controllers.rejoin.RejoinCompleteController.onPageLoad()
+GET        /error-submitting-rejoin                                         controllers.rejoin.ErrorSubmittingRejoinController.onPageLoad()
+GET        /cannot-rejoin                                                   controllers.rejoin.CannotRejoinController.onPageLoad()

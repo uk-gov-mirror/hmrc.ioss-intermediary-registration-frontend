@@ -48,12 +48,12 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def requireIntermediary: IntermediaryRequiredAction
 
-  def authAndGetData(inAmend: Boolean = false): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
+  def authAndGetData(inAmend: Boolean = false, inRejoin: Boolean = false): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
     actionBuilder andThen
       identify andThen
-      checkRegistration(inAmend) andThen
+      checkRegistration(inAmend, inRejoin) andThen
       getData andThen
-      requireData(inAmend) andThen
+      requireData(inAmend, inRejoin) andThen
       checkOtherCountryRegistration(inAmend)
   }
 
@@ -63,26 +63,27 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
       getData
   }
 
-  def authAndGetDataAndCheckVerifyEmail(waypoints: Waypoints, inAmend: Boolean): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
-    authAndGetData(inAmend) andThen
-      checkEmailVerificationStatus(waypoints, inAmend)
+  def authAndGetDataAndCheckVerifyEmail(waypoints: Waypoints, inAmend: Boolean, inRejoin: Boolean): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
+    authAndGetData(inAmend, inRejoin) andThen
+      checkEmailVerificationStatus(waypoints, inAmend, inRejoin)
   }
 
   def checkRegistration: CheckRegistrationFilterProvider
 
-  def authAndGetDataWithoutRegistrationCheck(inAmend: Boolean = false): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
+  def authAndGetDataWithoutRegistrationCheck(inAmend: Boolean = false, inRejoin: Boolean = false): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
     actionBuilder andThen
       identify andThen
       getData andThen
-      requireData(inAmend) andThen
+      requireData(inAmend, inRejoin) andThen
       checkOtherCountryRegistration(inAmend)
   }
 
   def authAndRequireIntermediary(
                                   waypoints: Waypoints = EmptyWaypoints,
-                                  inAmend: Boolean
+                                  inAmend: Boolean,
+                                  inRejoin: Boolean = false
                                 ): ActionBuilder[AuthenticatedMandatoryIntermediaryRequest, AnyContent] = {
-    authAndGetDataAndCheckVerifyEmail(waypoints, inAmend) andThen
+    authAndGetDataAndCheckVerifyEmail(waypoints, inAmend, inRejoin) andThen
       requireIntermediary()
   }
 }
